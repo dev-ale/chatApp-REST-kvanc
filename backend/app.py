@@ -1,9 +1,12 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_restplus import Api, Resource, fields
+
 
 # init
 app = Flask(__name__)
 api = Api(app)
+cors = CORS(app)
 
 # create 2 models one for users and one for messages
 model_user = api.model('User', {'ip' : fields.String('ip adress of the user'),'username' : fields.String('Username of the User')})
