@@ -4,7 +4,7 @@
 
     <h3>Users:</h3>
     Logged In: <span style="color: red; font-weight: bold">{{ loggedIn }}</span> <br>
-    <input placeholder="username" v-if="!loggedIn" type="text" v-model="userName" @keyup.enter="signIn">
+    <input placeholder="username" type="text" v-model="userName" @keyup.enter="signIn">
     <button @click="signOut">Logout</button>
     <ul>
       <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}</li>
@@ -15,18 +15,14 @@
     <ul>
       <li v-for="message of messages" :key="message.message"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} </li>
     </ul>
-    <div>
-      <input placeholder="message" v-if="!loggedIn" type="text" v-model="userName" @keyup.enter="sendMessage">
-    </div>
+    <input placeholder="message" v-if="!loggedIn" type="text" v-model="userName" @keyup.enter="sendMessage">
 
   </div>
-
-
-
 </template>
 
 <script>
 import axios from "axios"
+
 
 const userUrl = 'http://127.0.0.1:5000/api/users';
 const messageUrl = 'http://127.0.0.1:5000/api/messages';
