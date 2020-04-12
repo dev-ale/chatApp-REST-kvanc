@@ -9,7 +9,7 @@ asdasdasdjkasdnjaksdbnasdasd
 * Run `python app.py` from the project root.
 
 ## API Documentation
-
+![API Calls](https://i.imgur.com/zZtQUPk.png)
 
 
 
