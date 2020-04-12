@@ -26,6 +26,7 @@ init_user = {
             }
 users.append(init_user)
 
+
 # Users API call
 @api.route('/api/users')
 class User(Resource):
@@ -57,6 +58,12 @@ class Message(Resource):
     def post(self):
         messages.append(api.payload)
         return {'result' : 'User sent the message'}, 201
+
+    # Remove Message from the Chatroom
+    @api.expect(model_message)
+    def delete(self):
+        messages.remove(api.payload)
+        return {'result' : 'Message removed from the chatroom'}, 200
 
 if __name__ == '__main__':
     app.run(debug=True)
