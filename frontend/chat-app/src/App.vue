@@ -41,8 +41,8 @@ export default {
   },
   data() {
     return {
-      users: [],
-      messages: [],
+      users: [], // Array of Objects with actual Users (ip, username)
+      messages: [], // Array of Objects with actual Messages (username, message)
       userName: '',
       ip: '',
       messageContent: '',
@@ -56,6 +56,7 @@ export default {
     this.updateData(5000);
   },
   methods: {
+    // Method to fetch Userlist and Messages every x second
     updateData(interval) {
       setInterval(() => {
         this.getUsers();
@@ -63,6 +64,7 @@ export default {
         console.log("fetched user list and messages")
       }, interval);
     },
+    // Fetches the logged in Users from Backend
     async getUsers() {
       try {
         const users = await axios.get(userUrl);
@@ -71,6 +73,7 @@ export default {
         console.error(e)
       }
     },
+    // Fetches theMessages from Backend
     async getMessages() {
       try {
         const mes = await axios.get(messageUrl);
@@ -79,55 +82,49 @@ export default {
         console.error(e)
       }
     },
+    // addd the User to The Userlist in Backend
     async signIn() {
       try {
         const res = await axios.put(userUrl, {username: this.userName, ip: this.ip});
-
         this.users = [...this.users, res.data];
         this.loggedIn = true;
-        const users = await axios.get(userUrl);
-        this.users = users.data;
-        this.loggedIn = true;
-        console.log(this.userName);
+        this.getUsers();
       } catch(e) {
         console.error(e)
       }
     },
+
+    // Removes User from the List
     async signOut() {
       try {
-
         this.loggedIn = false;
-        //window.location.reload();
         this.userName = '';
-
+        // TODO: Should remove the User from the List
       } catch(e) {
         console.error(e)
       }
     },
+    // Gets Users external IP for as a ID
     getUsersIP() {
       fetch('https://api.ipify.org?format=json')
               .then(x => x.json())
               .then(({ ip }) => {
                 this.ip = ip;
-
               });
     },
-    getDate() {
-      let currentDateWithFormat = new Date().toJSON().slice(11,19).replace(/-/g,'/');
-      console.log(currentDateWithFormat);
-      return currentDateWithFormat.toString();
+    // Gets the Actual Time in Format (HH:MM)
+    getTime() {
+      let time = new Date().toJSON().slice(11,19).replace(/-/g,'/');
+      return time.toString();
     },
+    // Adds a Message to the List with the actual Username
+    // TODO: In every message a timestamp should be added at the end
     async sendMessage() {
       try {
-
         const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent});
-        console.log(this.userName);
-        console.log(this.messageContent);
         this.messages = [...this.messages, res.data];
         this.messageContent = '';
-
-        const mes = await axios.get(messageUrl);
-        this.messages = mes.data;
+        this.getMessages();
       } catch(e) {
         console.error(e)
       }
