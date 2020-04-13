@@ -4,13 +4,17 @@
     <h1>ChatApp REST - kvanc 2020</h1>
 
       <h3>Users:</h3>
-      Logged In: <span style="color: red; font-weight: bold">{{ loggedIn }}</span> <br>
-      <input placeholder="username" type="text" v-if="!loggedIn" v-model="userName" @keyup.enter="signIn">
-      <button v-if="loggedIn" @click="signOut">Logout</button>
-      <button v-if="!loggedIn" @click="signIn">Sign In</button>
-      <ul>
-        <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}</li>
-      </ul>
+      <p v-if="!serverConnected">No connection to server</p>
+      <div v-if="serverConnected">
+        Logged In: <span style="color: red; font-weight: bold">{{ loggedIn }}</span> <br>
+        <input placeholder="username" type="text" v-if="!loggedIn" v-model="userName" @keyup.enter="signIn">
+        <button v-if="loggedIn" @click="signOut">Logout</button>
+        <button v-if="!loggedIn" @click="signIn">Sign In</button>
+        <ul>
+          <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}</li>
+        </ul>
+      </div>
+
 
     <div>
       <h3>Chat:</h3>
@@ -46,7 +50,8 @@ export default {
       userName: '',
       ip: '',
       messageContent: '',
-      loggedIn: false
+      loggedIn: false,
+      serverConnected: false
     }
   },
   async created() {
@@ -69,8 +74,10 @@ export default {
       try {
         const users = await axios.get(userUrl);
         this.users = users.data;
+        this.serverConnected = true;
       } catch(e) {
         console.error(e)
+        this.serverConnected = false;
       }
     },
     // Fetches theMessages from Backend
