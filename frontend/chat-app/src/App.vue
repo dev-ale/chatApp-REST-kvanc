@@ -6,17 +6,23 @@
       <h3>Users:</h3>
       Logged In: <span style="color: red; font-weight: bold">{{ loggedIn }}</span> <br>
       <input placeholder="username" type="text" v-if="!loggedIn" v-model="userName" @keyup.enter="signIn">
-      <button @click="signOut">Logout</button>
+      <button v-if="loggedIn" @click="signOut">Logout</button>
+      <button v-if="!loggedIn" @click="signIn">Sign In</button>
       <ul>
         <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}</li>
       </ul>
 
+    <div>
       <h3>Chat:</h3>
       <p v-if="this.messages.length < 1">Keine Nachrichten, bis jetzt...</p>
-      <ul>
+      <p v-if="!loggedIn">Bitte zuerst einloggen...</p>
+
+      <ul v-if="loggedIn">
         <li v-for="message of messages" :key="message.message"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} <span style="font-size: 0.8em; color: lightgrey;">10:34</span></li>
       </ul>
-      <input placeholder="message" type="text" v-model="messageContent" @keyup.enter="sendMessage">
+      <input v-if="loggedIn" placeholder="message" type="text" v-model="messageContent" @keyup.enter="sendMessage">
+    </div>
+
   </div>
 </template>
 
@@ -44,6 +50,11 @@ export default {
     }
   },
   async created() {
+    setInterval(() => {
+      this.getUsers();
+      this.getMessages();
+      console.log("fetched data")
+    }, 5000);
     try {
       const users = await axios.get(userUrl);
       const mes = await axios.get(messageUrl);
@@ -56,6 +67,22 @@ export default {
     }
   },
   methods: {
+    async getUsers() {
+      try {
+        const users = await axios.get(userUrl);
+        this.users = users.data;
+      } catch(e) {
+        console.error(e)
+      }
+    },
+    async getMessages() {
+      try {
+        const mes = await axios.get(messageUrl);
+        this.messages = mes.data;
+      } catch(e) {
+        console.error(e)
+      }
+    },
     async signIn() {
       try {
         const res = await axios.put(userUrl, {username: this.userName, ip: this.ip});
