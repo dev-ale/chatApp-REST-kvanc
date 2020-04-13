@@ -22,7 +22,7 @@
       <p v-if="!loggedIn">Bitte zuerst einloggen</p>
 
       <ul v-if="loggedIn">
-        <li v-for="message of messages" :key="message.message"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} <span style="font-size: 0.8em; color: lightgrey;">10:34</span></li>
+        <li v-for="message of messages" :key="message.message"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} <span style="font-size: 0.8em; color: grey;">{{ message.time }}</span></li>
       </ul>
       <input v-if="loggedIn" placeholder="message" type="text" v-model="messageContent" @keyup.enter="sendMessage">
     </div>
@@ -129,7 +129,7 @@ export default {
     // TODO: In every message a timestamp should be added at the end
     async sendMessage() {
       try {
-        const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent});
+        const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()});
         this.messages = [...this.messages, res.data];
         this.messageContent = '';
         this.getMessages();
