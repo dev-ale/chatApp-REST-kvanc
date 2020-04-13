@@ -50,23 +50,19 @@ export default {
     }
   },
   async created() {
-    setInterval(() => {
-      this.getUsers();
-      this.getMessages();
-      console.log("fetched data")
-    }, 5000);
-    try {
-      const users = await axios.get(userUrl);
-      const mes = await axios.get(messageUrl);
-      this.getUsersIP();
-      this.getDate();
-      this.users = users.data;
-      this.messages = mes.data;
-    } catch(e) {
-      console.error(e)
-    }
+    this.getUsersIP();
+    this.getUsers();
+    this.getMessages();
+    this.updateData(5000);
   },
   methods: {
+    updateData(interval) {
+      setInterval(() => {
+        this.getUsers();
+        this.getMessages();
+        console.log("fetched user list and messages")
+      }, interval);
+    },
     async getUsers() {
       try {
         const users = await axios.get(userUrl);
