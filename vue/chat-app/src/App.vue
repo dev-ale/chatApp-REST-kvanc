@@ -67,7 +67,7 @@
             <div style="text-align: center">
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
-            <v-card v-if="loggedIn" class="elevation-12">
+            <v-card v-if="loggedIn && serverConnected" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
                 <v-toolbar-title>Chat</v-toolbar-title>
                 <v-spacer/>
