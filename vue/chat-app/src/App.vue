@@ -24,8 +24,12 @@
                 </div>
               </v-toolbar>
               <v-card-text>
-                <p v-if="this.users.length < 1">Keine User online</p>
-                <p v-if="!serverConnected">Keine Verbindung zum Server</p>
+                <div style="text-align: center">
+                  <p v-if="this.users.length < 1 && serverConnected">Keine User online</p>
+                  <p v-if="!serverConnected">Keine Verbindung zum Server</p>
+                </div>
+
+
                 <div v-if="serverConnected">
                   <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
                     <template slot="append">
@@ -41,14 +45,6 @@
                       <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
-
-<!--                  <ul>-->
-<!--                    <li v-for="user of users" :key="user.ip">-->
-<!--                      <v-icon>mdi-account</v-icon>-->
-<!--                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }}</span> : {{ user.ip }}-->
-<!--                      <button v-if="user.username === userName" @click="signOut">Logout</button>-->
-<!--                    </li>-->
-<!--                  </ul>-->
                 </div>
               </v-card-text>
             </v-card>
@@ -57,7 +53,7 @@
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="8">
             <div style="text-align: center">
-              <p v-if="!loggedIn">Bitte zuerst einloggen</p>
+              <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
             <v-card v-if="loggedIn" class="elevation-12">
               <v-toolbar color="primary" dark flat>
@@ -66,9 +62,14 @@
               </v-toolbar>
               <v-card-text>
                 <p v-if="this.messages.length < 1">Keine Nachrichten</p>
-                <ul>
-                  <li v-for="message of messages" :key="message.time"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} <span style="font-size: 0.8em; color: grey;">{{ message.time }}</span></li>
-                </ul>
+                <v-list>
+                  <v-list-item v-for="message of messages" :key="message.time"><span style="font-weight: bold">
+                    {{ message.username }}</span> : {{ message.message }}
+                    <v-chip style="text-align: right" x-small class="ma-2" color="grey" outlined>
+                      {{ message.time }}
+                    </v-chip>
+                  </v-list-item>
+                </v-list>
                 <br>
                 <v-text-field color="primary" v-if="loggedIn" label="Nachricht" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
                   <template slot="append">
