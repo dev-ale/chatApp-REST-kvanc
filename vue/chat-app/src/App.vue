@@ -5,9 +5,19 @@
       <v-spacer></v-spacer>
       <v-toolbar-title>ChatApp REST - kvanc 2020</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success">online</v-chip>
+      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="snackbar = true">connected</v-chip>
       <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">offline</v-chip>
+      <v-snackbar v-model="welcomeSnack" color="success" :timeout= 3000 bottom>
+        Willkommen im Chat, <span style="font-weight: bold">{{ userName }}</span>!
+        <v-btn color="black" text @click="welcomeSnack = false">Close</v-btn>
+      </v-snackbar>
+      <v-snackbar v-model="bybySnack" color="error" :timeout= 3000 bottom>
+        Bis bald!
+        <v-btn color="black" text @click="bybySnack = false">Close</v-btn>
+      </v-snackbar>
     </v-app-bar>
+
+
 
     <v-content>
       <v-container class="fill-height" fluid>
@@ -137,7 +147,9 @@
         loggedIn: false,
         serverConnected: false,
         chatbotMessages: true,
-        dynamic: 'grey'
+        dynamic: 'grey',
+        welcomeSnack: false,
+        bybySnack: false
       }
     },
     async created() {
@@ -185,6 +197,7 @@
           this.loggedIn = true;
           this.getUsers();
           this.sendChatboxMessage(' hat sich angemeldet');
+          this.welcomeSnack = true;
         } catch(e) {
           console.error(e)
         }
@@ -195,6 +208,7 @@
         try {
           console.log(this.userName + this.ip);
           await axios.delete(userUrl, {data: {username: this.userName, ip: this.ip}});
+          this.bybySnack = true;
           this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
           this.loggedIn = false;
