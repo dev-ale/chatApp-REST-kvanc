@@ -4,21 +4,23 @@
     <h1>ChatApp REST - kvanc 2020</h1>
 
       <h3>Users:</h3>
+      <p v-if="this.users.length < 1">Keine User online</p>
       <p v-if="!serverConnected">Keine Verbindung zum Server</p>
       <div v-if="serverConnected">
-        Logged In: <span style="color: red; font-weight: bold">{{ loggedIn }}</span> <br>
+
         <input placeholder="username" type="text" v-if="!loggedIn" v-model="userName" @keyup.enter="signIn">
-        <button v-if="loggedIn" @click="signOut">Logout</button>
         <button v-if="!loggedIn" @click="signIn">Sign In</button>
         <ul>
-          <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}</li>
+          <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}
+            <button v-if="user.username === userName" @click="signOut">Logout</button>
+          </li>
         </ul>
       </div>
 
 
     <div>
       <h3>Chat:</h3>
-      <p v-if="this.messages.length < 1">Keine Nachrichten, bis jetzt...</p>
+      <p v-if="this.messages.length < 1">Keine Nachrichten</p>
       <p v-if="!loggedIn">Bitte zuerst einloggen</p>
 
       <ul v-if="loggedIn">

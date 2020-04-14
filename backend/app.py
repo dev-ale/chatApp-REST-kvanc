@@ -14,18 +14,19 @@ model_message = api.model('Message', {'username' : fields.String('Username of th
 
 # creating 2 arrays (messages and users) and create for each array an initial object
 messages = []
+"""
 init_message = {
                           "username": "chatbot",
                           "message": "welcome to the chat!",
                           "time": "00:00"
                         }
-messages.append(init_message)
+messages.append(init_message) """
 users = []
-init_user = {
+""" init_user = {
               "ip": "192.168.1.15",
               "username": "ale"
             }
-users.append(init_user)
+users.append(init_user) """
 
 
 # Users API call
