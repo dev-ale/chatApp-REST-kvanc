@@ -150,6 +150,7 @@
           this.users = [...this.users, res.data];
           this.loggedIn = true;
           this.getUsers();
+          this.sendChatboxMessage(' hat sich eingeloggt');
         } catch(e) {
           console.error(e)
         }
@@ -160,6 +161,7 @@
         try {
           console.log(this.userName + this.ip);
           await axios.delete(userUrl, {data: {username: this.userName, ip: this.ip}});
+          this.sendChatboxMessage(' hat sich ausgeloggt');
           this.getUsers();
           this.loggedIn = false;
           this.userName = '';
@@ -191,6 +193,16 @@
           console.error(e)
         }
       },
+      // Adds a Message to the List with the actual Username
+      async sendChatboxMessage(mes) {
+        try {
+          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime()});
+          this.messages = [...this.messages, res.data];
+          this.getMessages();
+        } catch(e) {
+          console.error(e)
+        }
+      }
     },
 
   }
