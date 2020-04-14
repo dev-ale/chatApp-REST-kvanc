@@ -39,9 +39,13 @@
                 <p v-if="this.users.length < 1">Keine User online</p>
                 <p v-if="!serverConnected">Keine Verbindung zum Server</p>
                 <div v-if="serverConnected">
-
-                  <input placeholder="username" type="text" v-if="!loggedIn" v-model="userName" @keyup.enter="signIn">
-                  <button v-if="!loggedIn" @click="signIn">Sign In</button>
+                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
+                    <template slot="append">
+                      <v-btn v-if="!this.userName.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="signIn">
+                        <v-icon left>mdi-login-variant</v-icon>
+                      </v-btn>
+                    </template>
+                  </v-text-field>
                   <ul>
                     <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}
                       <button v-if="user.username === userName" @click="signOut">Logout</button>
@@ -55,11 +59,7 @@
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="8">
             <v-card class="elevation-12">
-              <v-toolbar
-                      color="primary"
-                      dark
-                      flat
-              >
+              <v-toolbar color="primary" dark flat>
                 <v-toolbar-title>Chat</v-toolbar-title>
                 <v-spacer/>
               </v-toolbar>
@@ -70,15 +70,19 @@
                 <ul v-if="loggedIn">
                   <li v-for="message of messages" :key="message.time"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} <span style="font-size: 0.8em; color: grey;">{{ message.time }}</span></li>
                 </ul>
-                <input v-if="loggedIn" placeholder="message" type="text" v-model="messageContent" @keyup.enter="sendMessage">
+                <br>
+                <v-text-field color="primary" v-if="loggedIn" label="Nachricht" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                  <template slot="append">
+                    <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
+                      <v-icon left>mdi-send-outline</v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
               </v-card-text>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
-
-
-
     </v-content>
   </v-app>
 </template>
