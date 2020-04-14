@@ -59,27 +59,43 @@
               <v-toolbar color="primary" dark flat>
                 <v-toolbar-title>Chat</v-toolbar-title>
                 <v-spacer/>
+                  <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
+                  <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
               </v-toolbar>
               <v-card-text>
                 <p v-if="this.messages.length < 1">Keine Nachrichten</p>
                 <v-list>
                   <v-list-item v-for="message of messages" :key="message.time">
-                    <span style="font-weight: bold">{{ message.username }} : </span>
-                    <br>
-                    <v-chip style="margin-left: 5px" v-if="message.username === userName"  color="primary">
-                      {{ message.message }}
-                      <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                    </v-chip>
 
-                    <v-chip style="margin-left: 5px" v-else-if="message.username === 'Chatbot'"  color="lightgrey">
-                      {{ message.message }}
-                      <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                    </v-chip>
+                    <!--Own Messages-->
+                    <div v-if="message.username === userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px" color="primary">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
 
-                    <v-chip style="margin-left: 5px" v-else color="success">
-                      {{ message.message }}
-                      <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                    </v-chip>
+                    <!--Chatbot Messages-->
+                      <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
+                        <v-chip small style="margin-left: 5px" color="lightgrey">
+                          {{ message.message }}
+                        </v-chip>
+                      </div>
+
+
+
+                    <!--Other Messages-->
+                    <div v-else-if="message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px"  color="success">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+
+
                   </v-list-item>
                 </v-list>
                 <br>
@@ -117,7 +133,8 @@
         ip: '',
         messageContent: '',
         loggedIn: false,
-        serverConnected: false
+        serverConnected: false,
+        chatbotMessages: true
       }
     },
     async created() {
@@ -162,7 +179,7 @@
           this.users = [...this.users, res.data];
           this.loggedIn = true;
           this.getUsers();
-          this.sendChatboxMessage(' hat sich eingeloggt');
+          this.sendChatboxMessage(' hat sich angemeldet');
         } catch(e) {
           console.error(e)
         }
@@ -173,7 +190,7 @@
         try {
           console.log(this.userName + this.ip);
           await axios.delete(userUrl, {data: {username: this.userName, ip: this.ip}});
-          this.sendChatboxMessage(' hat sich ausgeloggt');
+          this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
           this.loggedIn = false;
           this.userName = '';
@@ -214,6 +231,11 @@
         } catch(e) {
           console.error(e)
         }
+      },
+      changeChatbotStatus() {
+        this.chatbotMessages =! this.chatbotMessages;
+        this.getMessages();
+        console.log(this.chatbotMessages)
       }
     },
 
