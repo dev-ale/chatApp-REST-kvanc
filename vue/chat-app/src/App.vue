@@ -63,9 +63,14 @@
               <v-card-text>
                 <p v-if="this.messages.length < 1">Keine Nachrichten</p>
                 <v-list>
-                  <v-list-item v-for="message of messages" :key="message.time"><span style="font-weight: bold">
-                    {{ message.username }}</span> : {{ message.message }}
-                    <v-chip style="text-align: right" x-small class="ma-2" color="grey" outlined>
+                  <v-list-item v-for="message of messages" :key="message.time">
+                    <span style="font-weight: bold">{{ message.username }}</span>
+                    <br>
+                    <v-chip v-if="message.username === userName" small color="primary">{{ message.message }}</v-chip>
+                    <v-chip v-else-if="message.username === 'Chatbot'" small color="lightgrey">{{ message.message }}</v-chip>
+                    <v-chip v-else small color="green">{{ message.message }}</v-chip>
+
+                    <v-chip x-small class="ma-2" color="grey" outlined>
                       {{ message.time }}
                     </v-chip>
                   </v-list-item>
