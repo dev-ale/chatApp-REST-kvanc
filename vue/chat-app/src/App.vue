@@ -35,7 +35,7 @@
                       <v-icon>mdi-logout</v-icon>
                     </v-btn>
                   </template>
-                  <span>Source</span>
+                  <span>Logout</span>
                 </v-tooltip>
               </v-toolbar>
               <v-card-text>
@@ -50,7 +50,9 @@
                     </template>
                   </v-text-field>
                   <ul>
-                    <li v-for="user of users" :key="user.ip"><span style="font-weight: bold; font-size: 1.2em;">{{ user.username }}</span> : {{ user.ip }}
+                    <li v-for="user of users" :key="user.ip">
+                      <v-icon>mdi-account</v-icon>
+                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }}</span> : {{ user.ip }}
                       <button v-if="user.username === userName" @click="signOut">Logout</button>
                     </li>
                   </ul>
