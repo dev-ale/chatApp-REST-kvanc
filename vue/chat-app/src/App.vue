@@ -22,21 +22,6 @@
                 <div v-if="this.users.length > 0">
                   {{ this.users.length }}
                 </div>
-                <v-spacer/>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                            icon
-                            large
-                            target="_blank"
-                            v-on="on"
-                            @click="signOut"
-                    >
-                      <v-icon>mdi-logout</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Logout</span>
-                </v-tooltip>
               </v-toolbar>
               <v-card-text>
                 <p v-if="this.users.length < 1">Keine User online</p>
@@ -49,13 +34,21 @@
                       </v-btn>
                     </template>
                   </v-text-field>
-                  <ul>
-                    <li v-for="user of users" :key="user.ip">
+                  <v-list >
+                    <v-list-item v-for="user of users" :key="user.ip">
                       <v-icon>mdi-account</v-icon>
-                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }}</span> : {{ user.ip }}
-                      <button v-if="user.username === userName" @click="signOut">Logout</button>
-                    </li>
-                  </ul>
+                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }} </span> : {{ user.ip }}
+                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
+                    </v-list-item>
+                  </v-list>
+
+<!--                  <ul>-->
+<!--                    <li v-for="user of users" :key="user.ip">-->
+<!--                      <v-icon>mdi-account</v-icon>-->
+<!--                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }}</span> : {{ user.ip }}-->
+<!--                      <button v-if="user.username === userName" @click="signOut">Logout</button>-->
+<!--                    </li>-->
+<!--                  </ul>-->
                 </div>
               </v-card-text>
             </v-card>
@@ -63,16 +56,17 @@
         </v-row>
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="8">
-            <v-card class="elevation-12">
+            <div style="text-align: center">
+              <p v-if="!loggedIn">Bitte zuerst einloggen</p>
+            </div>
+            <v-card v-if="loggedIn" class="elevation-12">
               <v-toolbar color="primary" dark flat>
                 <v-toolbar-title>Chat</v-toolbar-title>
                 <v-spacer/>
               </v-toolbar>
               <v-card-text>
                 <p v-if="this.messages.length < 1">Keine Nachrichten</p>
-                <p v-if="!loggedIn">Bitte zuerst einloggen</p>
-
-                <ul v-if="loggedIn">
+                <ul>
                   <li v-for="message of messages" :key="message.time"><span style="font-weight: bold">{{ message.username }}</span> : {{ message.message }} <span style="font-size: 0.8em; color: grey;">{{ message.time }}</span></li>
                 </ul>
                 <br>
