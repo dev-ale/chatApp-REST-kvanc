@@ -1,10 +1,12 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary" dark>
+
+    <v-app-bar app dark :color="dynamic">
       <v-spacer></v-spacer>
       <v-toolbar-title>ChatApp REST - kvanc 2020</v-toolbar-title>
       <v-spacer></v-spacer>
-
+      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success">online</v-chip>
+      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">offline</v-chip>
     </v-app-bar>
 
     <v-content>
@@ -13,7 +15,7 @@
           <v-col cols="12" sm="8" md="3">
             <v-card class="elevation-12">
               <v-toolbar
-                      color="primary"
+                      :color="dynamic"
                       dark
                       flat
               >
@@ -33,7 +35,7 @@
                 <div v-if="serverConnected">
                   <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
                     <template slot="append">
-                      <v-btn icon color="primary" style="margin-bottom: 10px;" @click="signIn">
+                      <v-btn icon color="dynamic" style="margin-bottom: 10px;" @click="signIn">
                         <v-icon left>mdi-login-variant</v-icon>
                       </v-btn>
                     </template>
@@ -56,7 +58,7 @@
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
             <v-card v-if="loggedIn" class="elevation-12">
-              <v-toolbar color="primary" dark flat>
+              <v-toolbar :color="dynamic" dark flat>
                 <v-toolbar-title>Chat</v-toolbar-title>
                 <v-spacer/>
                   <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
@@ -118,8 +120,8 @@
 <script>
   import axios from "axios"
 
-  const userUrl = 'http://127.0.0.1:5000/api/users';
-  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+   const userUrl = 'http://127.0.0.1:5000/api/users';
+   const messageUrl = 'http://127.0.0.1:5000/api/messages';
 
   export default {
     name: 'App',
@@ -134,7 +136,8 @@
         messageContent: '',
         loggedIn: false,
         serverConnected: false,
-        chatbotMessages: true
+        chatbotMessages: true,
+        dynamic: 'grey'
       }
     },
     async created() {
@@ -158,9 +161,11 @@
           const users = await axios.get(userUrl);
           this.users = users.data;
           this.serverConnected = true;
+          this.dynamic = '#546e7a';
         } catch(e) {
           console.error(e)
           this.serverConnected = false;
+          this.dynamic = 'grey';
         }
       },
       // Fetches theMessages from Backend
