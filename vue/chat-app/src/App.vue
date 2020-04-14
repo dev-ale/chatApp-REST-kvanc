@@ -18,7 +18,10 @@
                       flat
               >
                 <v-toolbar-title>Users</v-toolbar-title>
-
+                <v-spacer/>
+                <div v-if="this.users.length > 0">
+                  {{ this.users.length }}
+                </div>
                 <v-spacer/>
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
@@ -41,7 +44,7 @@
                 <div v-if="serverConnected">
                   <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
                     <template slot="append">
-                      <v-btn v-if="!this.userName.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="signIn">
+                      <v-btn icon color="primary" style="margin-bottom: 10px;" @click="signIn">
                         <v-icon left>mdi-login-variant</v-icon>
                       </v-btn>
                     </template>
