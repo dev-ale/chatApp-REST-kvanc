@@ -227,7 +227,7 @@
       },
       // Gets the Actual Time in Format (HH:MM)
       getTime() {
-        let time = new Date().toJSON().slice(11,17).replace(/-/g,'/');
+        let time = new Date().toJSON().slice(11,16).replace(/-/g,'/');
         return time.toString();
       },
       // Adds a Message to the List with the actual Username

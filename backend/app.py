@@ -12,22 +12,9 @@ cors = CORS(app)
 model_user = api.model('User', {'ip' : fields.String('ip adress of the user'),'username' : fields.String('Username of the User')})
 model_message = api.model('Message', {'username' : fields.String('Username of the User'),'message' : fields.String('Message user wants to send'),'time' : fields.String('Timestamp of the Message')})
 
-# creating 2 arrays (messages and users) and create for each array an initial object
+# creating 2 arrays (messages and users)
 messages = []
-"""
-init_message = {
-                          "username": "chatbot",
-                          "message": "welcome to the chat!",
-                          "time": "00:00"
-                        }
-messages.append(init_message) """
 users = []
-""" init_user = {
-              "ip": "192.168.1.15",
-              "username": "ale"
-            }
-users.append(init_user) """
-
 
 # Users API call
 @api.route('/api/users')
