@@ -7,14 +7,7 @@
       <v-spacer></v-spacer>
       <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="snackbar = true">connected</v-chip>
       <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">offline</v-chip>
-      <v-snackbar v-model="welcomeSnack" color="success" :timeout= 3000 bottom>
-        Willkommen im Chat, <span style="font-weight: bold">{{ userName }}</span>!
-        <v-btn color="black" text @click="welcomeSnack = false">Close</v-btn>
-      </v-snackbar>
-      <v-snackbar v-model="bybySnack" color="error" :timeout= 3000 bottom>
-        Bis bald!
-        <v-btn color="black" text @click="bybySnack = false">Close</v-btn>
-      </v-snackbar>
+
     </v-app-bar>
 
 
@@ -123,6 +116,14 @@
           </v-col>
         </v-row>
       </v-container>
+      <v-snackbar v-model="welcomeSnack" color="success" :timeout= 3000 bottom>
+        Willkommen im Chat, <span style="font-weight: bold">{{userName}}</span>!
+        <v-btn color="black" text @click="welcomeSnack = false">Close</v-btn>
+      </v-snackbar>
+      <v-snackbar v-model="bybySnack" color="error" :timeout= 3000 bottom>
+        Bis bald!
+        <v-btn color="black" text @click="bybySnack = false">Close</v-btn>
+      </v-snackbar>
     </v-content>
   </v-app>
 </template>

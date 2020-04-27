@@ -9,7 +9,7 @@ api = Api(app)
 cors = CORS(app)
 
 # create 2 models one for users and one for messages
-model_user = api.model('User', {'ip' : fields.String('ip adress of the user'),'username' : fields.String('Username of the User')})
+model_user = api.model('User', {'username' : fields.String('Name of the User')})
 model_message = api.model('Message', {'username' : fields.String('Username of the User'),'message' : fields.String('Message user wants to send'),'time' : fields.String('Timestamp of the Message')})
 
 # creating 2 arrays (messages and users)
@@ -26,12 +26,14 @@ class User(Resource):
     # Put an new User to the Chatroom
     @api.expect(model_user)
     def put(self):
+        # TODO: if statement einbauen für Kontrolle ob Benutzer schon existiert
         users.append(api.payload)
         return {'result' : 'User added to the chatroom'}, 201
 
     # Remove User from the Chatroom
     @api.expect(model_user)
     def delete(self):
+        # TODO: if statement einbauen für Kontrolle ob Benutzer übrhaupt existiert
         users.remove(api.payload)
         return {'result' : 'User removed from the chatroom'}, 200
 
