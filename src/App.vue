@@ -134,7 +134,7 @@
    //const userUrl = 'http://127.0.0.1:5000/api/users';
    //const messageUrl = 'http://127.0.0.1:5000/api/messages';
    const userUrl = 'https://kvanc-rest-chatapp-backend.herokuapp.com/api/users';
-   const messageUrl = 'https://kvanc-rest-chatapp-backend.herokuapp.com//api/messages';
+   const messageUrl = 'https://kvanc-rest-chatapp-backend.herokuapp.com/api/messages';
 
   export default {
     name: 'App',
