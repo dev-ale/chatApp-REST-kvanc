@@ -131,8 +131,10 @@
 <script>
   import axios from "axios"
 
-   const userUrl = 'http://127.0.0.1:5000/api/users';
-   const messageUrl = 'http://127.0.0.1:5000/api/messages';
+   //const userUrl = 'http://127.0.0.1:5000/api/users';
+   //const messageUrl = 'http://127.0.0.1:5000/api/messages';
+   const userUrl = 'http://10.35.148.180:8080/api/users';
+   const messageUrl = 'http://10.35.148.180:8080/api/messages';
 
   export default {
     name: 'App',
