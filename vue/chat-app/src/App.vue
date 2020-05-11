@@ -44,10 +44,10 @@
                     </template>
                   </v-text-field>
                   <v-list >
-                    <v-list-item v-for="user of users" :key="user.ip">
+                    <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
-                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }} </span> : {{ user.ip }}
-                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
+                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user }} </span>
+                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
                 </div>
@@ -140,10 +140,9 @@
     },
     data() {
       return {
-        users: [], // Array of Objects with actual Users (ip, username)
+        users: [], // Array of Strings with Usernames
         messages: [], // Array of Objects with actual Messages (username, message)
         userName: '',
-        ip: '',
         messageContent: '',
         loggedIn: false,
         serverConnected: false,
@@ -154,7 +153,6 @@
       }
     },
     async created() {
-      this.getUsersIP();
       this.getUsers();
       this.getMessages();
       this.updateData(5000);
@@ -193,7 +191,7 @@
       // addd the User to The Userlist in Backend
       async signIn() {
         try {
-          const res = await axios.put(userUrl, {username: this.userName, ip: this.ip});
+          const res = await axios.put(userUrl, {username: this.userName});
           this.users = [...this.users, res.data];
           this.loggedIn = true;
           this.getUsers();
@@ -207,8 +205,8 @@
       // Removes User from the List
       async signOut() {
         try {
-          console.log(this.userName + this.ip);
-          await axios.delete(userUrl, {data: {username: this.userName, ip: this.ip}});
+          console.log(this.userName);
+          await axios.delete(userUrl, {data: {username: this.userName}});
           this.bybySnack = true;
           this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
@@ -217,14 +215,6 @@
         } catch(e) {
           console.error(e)
         }
-      },
-      // Gets Users external IP for as a ID
-      getUsersIP() {
-        fetch('https://api.ipify.org?format=json')
-                .then(x => x.json())
-                .then(({ ip }) => {
-                  this.ip = ip;
-                });
       },
       // Gets the Actual Time in Format (HH:MM)
       getTime() {

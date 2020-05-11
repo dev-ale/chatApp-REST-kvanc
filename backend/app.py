@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
+import werkzeug
+werkzeug.cached_property = werkzeug.utils.cached_property
 from flask_restplus import Api, Resource, fields
+import json
 
 
 # init
@@ -26,14 +29,17 @@ class User(Resource):
     # Put an new User to the Chatroom
     @api.expect(model_user)
     def put(self):
-        # TODO: if statement einbauen für Kontrolle ob Benutzer schon existiert
-        users.append(api.payload)
+        username = api.payload['username']
+        print(username)
+        if username in users:
+            print('already signed in')
+            return {'result' : 'You are already signed in'}, 403
+        users.append(username)
         return {'result' : 'User added to the chatroom'}, 201
 
     # Remove User from the Chatroom
     @api.expect(model_user)
     def delete(self):
-        # TODO: if statement einbauen für Kontrolle ob Benutzer übrhaupt existiert
         users.remove(api.payload)
         return {'result' : 'User removed from the chatroom'}, 200
 
