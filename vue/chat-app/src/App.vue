@@ -44,9 +44,9 @@
                     </template>
                   </v-text-field>
                   <v-list >
-                    <v-list-item v-for="user of users" :key="user.ip">
+                    <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
-                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }} </span> : {{ user.ip }}
+                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }} </span>
                       <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
@@ -131,8 +131,14 @@
 <script>
   import axios from "axios"
 
-   const userUrl = 'http://127.0.0.1:5000/api/users';
-   const messageUrl = 'http://127.0.0.1:5000/api/messages';
+    // on fhnw server
+   //const userUrl = 'http://10.35.148.180:8080/api/users';
+   //const messageUrl = 'http://10.35.148.180:8080/api/messages';
+
+  // local
+  const userUrl = 'http://127.0.0.1:5000/api/users';
+  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+
 
   export default {
     name: 'App',
@@ -140,10 +146,9 @@
     },
     data() {
       return {
-        users: [], // Array of Objects with actual Users (ip, username)
+        users: [], // Array of Strings with Usernames
         messages: [], // Array of Objects with actual Messages (username, message)
         userName: '',
-        ip: '',
         messageContent: '',
         loggedIn: false,
         serverConnected: false,
@@ -154,7 +159,6 @@
       }
     },
     async created() {
-      this.getUsersIP();
       this.getUsers();
       this.getMessages();
       this.updateData(5000);
@@ -193,7 +197,7 @@
       // addd the User to The Userlist in Backend
       async signIn() {
         try {
-          const res = await axios.put(userUrl, {username: this.userName, ip: this.ip});
+          const res = await axios.put(userUrl, {username: this.userName});
           this.users = [...this.users, res.data];
           this.loggedIn = true;
           this.getUsers();
@@ -207,8 +211,8 @@
       // Removes User from the List
       async signOut() {
         try {
-          console.log(this.userName + this.ip);
-          await axios.delete(userUrl, {data: {username: this.userName, ip: this.ip}});
+          console.log(this.userName);
+          await axios.delete(userUrl, {data: {username: this.userName}});
           this.bybySnack = true;
           this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
@@ -218,28 +222,34 @@
           console.error(e)
         }
       },
-      // Gets Users external IP for as a ID
-      getUsersIP() {
-        fetch('https://api.ipify.org?format=json')
-                .then(x => x.json())
-                .then(({ ip }) => {
-                  this.ip = ip;
-                });
-      },
       // Gets the Actual Time in Format (HH:MM)
       getTime() {
-        let time = new Date().toJSON().slice(11,16).replace(/-/g,'/');
+        let time = new Date().toJSON().slice(11,19).replace(/-/g,'/');
         return time.toString();
       },
       // Adds a Message to the List with the actual Username
       async sendMessage() {
-        try {
-          const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()});
-          this.messages = [...this.messages, res.data];
-          this.messageContent = '';
-          this.getMessages();
-        } catch(e) {
-          console.error(e)
+        if (this.messageContent.includes("@")) {
+          console.log("private Message")
+          try {
+            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()})
+            this.messages = [...this.messages, res.data]
+            this.messageContent = ''
+            this.getMessages()
+          } catch(e) {
+            console.error(e)
+          }
+        }
+        else {
+          console.log("normal Message")
+          try {
+            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()})
+            this.messages = [...this.messages, res.data]
+            this.messageContent = ''
+            this.getMessages()
+          } catch(e) {
+            console.error(e)
+          }
         }
       },
       // Adds a Message to the List with the actual Username
