@@ -229,13 +229,27 @@
       },
       // Adds a Message to the List with the actual Username
       async sendMessage() {
-        try {
-          const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()});
-          this.messages = [...this.messages, res.data];
-          this.messageContent = '';
-          this.getMessages();
-        } catch(e) {
-          console.error(e)
+        if (this.messageContent.includes("@")) {
+          console.log("private Message")
+          try {
+            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()})
+            this.messages = [...this.messages, res.data]
+            this.messageContent = ''
+            this.getMessages()
+          } catch(e) {
+            console.error(e)
+          }
+        }
+        else {
+          console.log("normal Message")
+          try {
+            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()})
+            this.messages = [...this.messages, res.data]
+            this.messageContent = ''
+            this.getMessages()
+          } catch(e) {
+            console.error(e)
+          }
         }
       },
       // Adds a Message to the List with the actual Username

@@ -68,5 +68,21 @@ class Message(Resource):
         messages.remove(api.payload)
         return {'result' : 'Message removed from the chatroom'}, 200
 
+
+# Message API Call
+@api.route('/api/messages/alejandro.garcia')
+class Message(Resource):
+    # Returns all Messages in the Chatroom
+    def get(self):
+        return messages
+
+    # Posts a new Message to the Private Chatroom
+    @api.expect(model_message)
+    def post(self):
+        username = api.payload['username']
+        print(username)
+        messages.append(api.payload)
+        return {'result' : 'user sent the message'}, 201
+
 if __name__ == '__main__':
     app.run(debug=True)
