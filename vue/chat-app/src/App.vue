@@ -48,7 +48,7 @@
                       <v-icon>mdi-account</v-icon>
                       <span @click="receiver = user.username" style="font-weight: bold; font-size: 1.2em; cursor: pointer"> {{ user.username }} </span>
                       <v-btn depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="receiver === user.username && userName !== user.username">Privater Chat</v-btn>
-                      <v-btn depressed x-small dark color="#00695c" v-if="receiver !== user.username" @click="receiver = user.username">{{ filterPrivate.length }}</v-btn>
+<!--                      <v-btn depressed x-small dark color="#00695c" v-if="receiver !== user.username" @click="receiver = user.username">{{ calcPrivateMessages(user.username) }}</v-btn>-->
                       <v-btn depressed x-small v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
                       <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
@@ -93,10 +93,17 @@
                       </v-chip>
                     </div>
 
-
+                    <!--Private Messages-->
+                    <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px" dark color="#00695c">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
 
                     <!--Other Messages-->
-                    <div v-else-if="message.username !== 'Chatbot' && message.username !== userName">
+                    <div v-else-if="message.receiver === 'all' && message.username !== 'Chatbot' && message.username !== userName">
                       <span style="font-weight: bold">{{ message.username }} : </span>
                       <v-chip style="margin-left: 5px"  color="success">
                         {{ message.message }}
@@ -224,13 +231,14 @@
       this.updateData(5000);
     },
     computed: {
-
       filterAll: function() {
         let filtered = this.messages
         if (this.receiver === 'all') {
           console.log('filter activated: ' + this.receiver)
           filtered = filtered.filter(
-                  m => m.receiver === 'all'
+                  m =>
+                          m.receiver === 'all' ||
+                          m.receiver === this.userName
           );
           console.log(filtered)
         }
@@ -257,9 +265,9 @@
     },
     methods: {
 
-      changeReceiver () {
-        this.receiver = this.userName;
-        console.log(this.receiver);
+      calcPrivateMessages () {
+        let result = this.messages
+        return result
       },
       // Method to fetch Userlist and Messages every x second
       updateData(interval) {
