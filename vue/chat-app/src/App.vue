@@ -47,8 +47,9 @@
                     <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
                       <span @click="receiver = user.username" style="font-weight: bold; font-size: 1.2em; cursor: pointer"> {{ user.username }} </span>
-                      <v-chip color="dynamic" v-if="receiver === user.username && userName !== user.username"> Private Nachricht</v-chip>
-                      <v-btn depressed x-small style="align-self: center; align-content: center" v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
+                      <v-btn depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="receiver === user.username && userName !== user.username">Privater Chat</v-btn>
+                      <v-btn depressed x-small dark color="#00695c" v-if="receiver !== user.username" @click="receiver = user.username">{{ filterPrivate.length }}</v-btn>
+                      <v-btn depressed x-small v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
                       <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
@@ -66,7 +67,7 @@
 
             <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
-                <v-toolbar-title>Chat</v-toolbar-title>
+                <v-toolbar-title>öffentlicher Chat</v-toolbar-title>
                 <v-spacer/>
                 <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
                 <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
@@ -119,8 +120,8 @@
             </v-card>
 
             <v-card v-if="loggedIn && serverConnected && this.receiver !== 'all'" class="elevation-12">
-              <v-toolbar :color="dynamic" dark flat>
-                <v-toolbar-title>Privater Chat mit: {{ this.receiver}}</v-toolbar-title>
+              <v-toolbar color="#00695c" dark flat>
+                <v-toolbar-title>Privater Chat mit: {{ this.receiver }}</v-toolbar-title>
                 <v-spacer/>
                   <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
                   <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
@@ -136,7 +137,6 @@
                       <v-chip style="margin-left: 5px" color="primary">
                         {{ message.message }}
                         <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.receiver }}</span>
                       </v-chip>
                     </div>
 
@@ -144,7 +144,6 @@
                       <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
                         <v-chip small style="margin-left: 5px" color="lightgrey">
                           {{ message.message }}
-                          <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.receiver }}</span>
                         </v-chip>
                       </div>
 
@@ -156,7 +155,6 @@
                       <v-chip style="margin-left: 5px"  color="success">
                         {{ message.message }}
                         <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.receiver }}</span>
                       </v-chip>
                     </div>
 
