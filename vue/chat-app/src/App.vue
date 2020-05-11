@@ -46,9 +46,11 @@
                   <v-list>
                     <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
-                      <span @click="receiver = user.username" style="font-weight: bold; font-size: 1.2em; cursor: pointer"> {{ user.username }} </span>
-                      <v-btn depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="receiver === user.username && userName !== user.username">Privater Chat</v-btn>
-<!--                      <v-btn depressed x-small dark color="#00695c" v-if="receiver !== user.username" @click="receiver = user.username">{{ calcPrivateMessages(user.username) }}</v-btn>-->
+                      <span style="font-weight: bold; font-size: 1.2em; cursor: pointer"> {{ user.username }} </span>
+                      <v-btn @click="receiver = user.username" outlined depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="loggedIn === true && userName !== user.username && receiver !== user.username">Privater Chat</v-btn>
+
+                      <v-btn @click="receiver = 'all'"  depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="loggedIn === true && userName !== user.username && receiver === user.username">Privater Chat</v-btn>
+
                       <v-btn depressed x-small v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
                       <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
