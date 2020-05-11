@@ -13,7 +13,7 @@ cors = CORS(app)
 
 # create 2 models one for users and one for messages
 model_user = api.model('User', {'username' : fields.String('Name of the User')})
-model_message = api.model('Message', {'username' : fields.String('Username of the User'),'message' : fields.String('Message user wants to send'),'time' : fields.String('Timestamp of the Message')})
+model_message = api.model('Message', {'username' : fields.String('Username of the User'),'message' : fields.String('Message user wants to send'),'time' : fields.String('Timestamp of the Message'),'receiver' : fields.String('who can see the messages')})
 
 # creating 2 arrays (messages and users)
 messages = []
@@ -69,20 +69,6 @@ class Message(Resource):
         return {'result' : 'Message removed from the chatroom'}, 200
 
 
-# Message API Call
-@api.route('/api/messages/alejandro.garcia')
-class Message(Resource):
-    # Returns all Messages in the Chatroom
-    def get(self):
-        return messages
-
-    # Posts a new Message to the Private Chatroom
-    @api.expect(model_message)
-    def post(self):
-        username = api.payload['username']
-        print(username)
-        messages.append(api.payload)
-        return {'result' : 'user sent the message'}, 201
 
 if __name__ == '__main__':
     app.run(debug=True)
