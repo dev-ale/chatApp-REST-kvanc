@@ -46,8 +46,8 @@
                   <v-list >
                     <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
-                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user }} </span>
-                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user === userName" @click="signOut">Logout</v-btn>
+                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }} </span>
+                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
                 </div>

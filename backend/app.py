@@ -29,7 +29,8 @@ class User(Resource):
     # Put an new User to the Chatroom
     @api.expect(model_user)
     def put(self):
-        username = api.payload['username']
+        username = api.payload
+        print(api.payload)
         print(username)
         if username in users:
             print('already signed in')
