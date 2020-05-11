@@ -149,7 +149,7 @@
     data() {
       return {
         users: [], // Array of Strings with Usernames
-        messages: [], // Array of Objects with actual Messages (username, message)
+        messages: [], // Array of Objects with actual Messages (username, message, time and receiver)
         userName: '',
         messageContent: '',
         loggedIn: false,
@@ -175,10 +175,13 @@
       // Method to fetch Userlist and Messages every x second
       updateData(interval) {
         setInterval(() => {
-          this.getUsers();
-          this.getMessages();
-          console.log("fetched user list and messages")
-        }, interval);
+          this.getUsers()
+          console.log('fetched users')
+          if (this.loggedIn) {
+            this.getMessages()
+            console.log('fetched messages')
+          }
+        }, interval)
       },
       // Fetches the logged in Users from Backend
       async getUsers() {
@@ -195,12 +198,12 @@
       },
       // Fetches theMessages from Backend
       async getMessages() {
-        try {
-          const mes = await axios.get(messageUrl);
-          this.messages = mes.data;
-        } catch(e) {
-          console.error(e)
-        }
+          try {
+            const mes = await axios.get(messageUrl);
+            this.messages = mes.data;
+          } catch(e) {
+            console.error(e)
+          }
       },
       // addd the User to The Userlist in Backend
       async signIn() {
@@ -237,7 +240,6 @@
       },
       // Adds a Message to the List with the actual Username
       async sendMessage() {
-        if (this.messageContent.includes("@")) {
           console.log("private Message")
           try {
             const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: 'private'})
@@ -247,19 +249,6 @@
           } catch(e) {
             console.error(e)
           }
-        }
-        else {
-
-          console.log("normal Message")
-          try {
-            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
-            this.messages = [...this.messages, res.data]
-            this.messageContent = ''
-            this.getMessages()
-          } catch(e) {
-            console.error(e)
-          }
-        }
       },
       // Adds a Message to the List with the actual Username
       async sendChatboxMessage(mes) {
