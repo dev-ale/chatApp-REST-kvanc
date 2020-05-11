@@ -131,8 +131,14 @@
 <script>
   import axios from "axios"
 
-   const userUrl = 'http://127.0.0.1:5000/api/users';
-   const messageUrl = 'http://127.0.0.1:5000/api/messages';
+    // on fhnw server
+   //const userUrl = 'http://10.35.148.180:8080/api/users';
+   //const messageUrl = 'http://10.35.148.180:8080/api/messages';
+
+  // local
+  const userUrl = 'http://127.0.0.1:5000/api/users';
+  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+
 
   export default {
     name: 'App',
@@ -218,7 +224,7 @@
       },
       // Gets the Actual Time in Format (HH:MM)
       getTime() {
-        let time = new Date().toJSON().slice(11,16).replace(/-/g,'/');
+        let time = new Date().toJSON().slice(11,19).replace(/-/g,'/');
         return time.toString();
       },
       // Adds a Message to the List with the actual Username

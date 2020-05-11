@@ -18,6 +18,7 @@ model_message = api.model('Message', {'username' : fields.String('Username of th
 # creating 2 arrays (messages and users)
 messages = []
 users = []
+admins = [{'username': 'ale'}]
 
 # Users API call
 @api.route('/api/users')
@@ -30,13 +31,15 @@ class User(Resource):
     @api.expect(model_user)
     def put(self):
         username = api.payload
-        print(api.payload)
-        print(username)
         if username in users:
-            print('already signed in')
+            print( username + 'already signed in')
             return {'result' : 'You are already signed in'}, 403
         users.append(username)
-        return {'result' : 'User added to the chatroom'}, 201
+        return {'result' : 'user added to the chatroom'}, 201
+        # doesnt work yet
+        if username in admins:
+            print('User is Admin')
+            # Do something here
 
     # Remove User from the Chatroom
     @api.expect(model_user)
@@ -54,8 +57,10 @@ class Message(Resource):
     # Posts a new Message to the Chatroom
     @api.expect(model_message)
     def post(self):
+        username = api.payload['username']
+        print(username)
         messages.append(api.payload)
-        return {'result' : 'User sent the message'}, 201
+        return {'result' : 'user sent the message'}, 201
 
     # Remove Message from the Chatroom
     @api.expect(model_message)
