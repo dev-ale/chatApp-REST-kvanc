@@ -43,10 +43,13 @@
                       </v-btn>
                     </template>
                   </v-text-field>
-                  <v-list >
+                  <v-list>
                     <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
-                      <span style="font-weight: bold; font-size: 1.2em;"> {{ user.username }} </span>
+                      <span @click="receiver = user.username" style="font-weight: bold; font-size: 1.2em; cursor: pointer"> {{ user.username }} </span>
+                      <v-btn depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="receiver === user.username && userName !== user.username">Privater Chat</v-btn>
+<!--                      <v-btn depressed x-small dark color="#00695c" v-if="receiver !== user.username" @click="receiver = user.username">{{ calcPrivateMessages(user.username) }}</v-btn>-->
+                      <v-btn depressed x-small v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
                       <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
@@ -60,17 +63,80 @@
             <div style="text-align: center">
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
-            <v-card v-if="loggedIn && serverConnected" class="elevation-12">
+
+
+            <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
-                <v-toolbar-title>Chat</v-toolbar-title>
+                <v-toolbar-title>öffentlicher Chat</v-toolbar-title>
+                <v-spacer/>
+                <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
+                <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
+              </v-toolbar>
+              <v-card-text>
+                <p v-if="this.filterAll.length < 1">Keine Nachrichten</p>
+                <v-list>
+                  <v-list-item v-for="message of filterAll" :key="message.time">
+
+                    <!--Own Messages-->
+                    <div v-if="message.username === userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px" color="primary">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+                    <!--Chatbot Messages-->
+                    <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
+                      <v-chip small style="margin-left: 5px" color="lightgrey">
+                        {{ message.message }}
+                      </v-chip>
+                    </div>
+
+                    <!--Private Messages-->
+                    <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px" dark color="#00695c">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+                    <!--Other Messages-->
+                    <div v-else-if="message.receiver === 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px"  color="success">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+
+
+                  </v-list-item>
+                </v-list>
+                <br>
+                <v-text-field color="primary" v-if="loggedIn" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                  <template slot="append">
+                    <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
+                      <v-icon left>mdi-send-outline</v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
+              </v-card-text>
+            </v-card>
+
+            <v-card v-if="loggedIn && serverConnected && this.receiver !== 'all'" class="elevation-12">
+              <v-toolbar color="#00695c" dark flat>
+                <v-toolbar-title>Privater Chat mit: {{ this.receiver }}</v-toolbar-title>
                 <v-spacer/>
                   <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
                   <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
               </v-toolbar>
               <v-card-text>
-                <p v-if="this.messages.length < 1">Keine Nachrichten</p>
+                <p v-if="this.filterPrivate.length < 1">Keine Nachrichten</p>
                 <v-list>
-                  <v-list-item v-for="message of messages" :key="message.time">
+                  <v-list-item v-for="message of filterPrivate" :key="message.time">
 
                     <!--Own Messages-->
                     <div v-if="message.username === userName">
@@ -104,7 +170,7 @@
                   </v-list-item>
                 </v-list>
                 <br>
-                <v-text-field color="primary" v-if="loggedIn" label="Nachricht" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                <v-text-field color="primary" v-if="loggedIn" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
                   <template slot="append">
                     <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
                       <v-icon left>mdi-send-outline</v-icon>
@@ -147,7 +213,7 @@
     data() {
       return {
         users: [], // Array of Strings with Usernames
-        messages: [], // Array of Objects with actual Messages (username, message)
+        messages: [], // Array of Objects with actual Messages (username, message, time and receiver)
         userName: '',
         messageContent: '',
         loggedIn: false,
@@ -155,7 +221,8 @@
         chatbotMessages: true,
         dynamic: 'grey',
         welcomeSnack: false,
-        bybySnack: false
+        bybySnack: false,
+        receiver: 'all'
       }
     },
     async created() {
@@ -163,14 +230,55 @@
       this.getMessages();
       this.updateData(5000);
     },
+    computed: {
+      filterAll: function() {
+        let filtered = this.messages
+        if (this.receiver === 'all') {
+          console.log('filter activated: ' + this.receiver)
+          filtered = filtered.filter(
+                  m =>
+                          m.receiver === 'all' ||
+                          m.receiver === this.userName
+          );
+          console.log(filtered)
+        }
+        return filtered;
+
+      },
+      filterPrivate: function() {
+        let filtered = this.messages
+        if (this.receiver !== 'all') {
+          console.log('filter activated: ' + this.receiver)
+          filtered = filtered.filter(
+                  m =>
+                          // Nachrichten von Absender an mich
+                          m.receiver === this.receiver &&
+                          m.username === this.userName ||
+
+                          m.receiver === this.userName &&
+                          m.username === this.receiver
+          );
+          console.log(filtered)
+        }
+        return filtered;
+      }
+    },
     methods: {
+
+      calcPrivateMessages () {
+        let result = this.messages
+        return result
+      },
       // Method to fetch Userlist and Messages every x second
       updateData(interval) {
         setInterval(() => {
-          this.getUsers();
-          this.getMessages();
-          console.log("fetched user list and messages")
-        }, interval);
+          this.getUsers()
+          //console.log('fetched users')
+          if (this.loggedIn) {
+            this.getMessages()
+            //console.log('fetched messages')
+          }
+        }, interval)
       },
       // Fetches the logged in Users from Backend
       async getUsers() {
@@ -187,12 +295,12 @@
       },
       // Fetches theMessages from Backend
       async getMessages() {
-        try {
-          const mes = await axios.get(messageUrl);
-          this.messages = mes.data;
-        } catch(e) {
-          console.error(e)
-        }
+          try {
+            const mes = await axios.get(messageUrl);
+            this.messages = mes.data;
+          } catch(e) {
+            console.error(e)
+          }
       },
       // addd the User to The Userlist in Backend
       async signIn() {
@@ -229,33 +337,20 @@
       },
       // Adds a Message to the List with the actual Username
       async sendMessage() {
-        if (this.messageContent.includes("@")) {
           console.log("private Message")
           try {
-            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()})
+            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
             this.messages = [...this.messages, res.data]
             this.messageContent = ''
             this.getMessages()
           } catch(e) {
             console.error(e)
           }
-        }
-        else {
-          console.log("normal Message")
-          try {
-            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime()})
-            this.messages = [...this.messages, res.data]
-            this.messageContent = ''
-            this.getMessages()
-          } catch(e) {
-            console.error(e)
-          }
-        }
       },
       // Adds a Message to the List with the actual Username
       async sendChatboxMessage(mes) {
         try {
-          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime()});
+          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'chatbot'});
           this.messages = [...this.messages, res.data];
           this.getMessages();
         } catch(e) {
