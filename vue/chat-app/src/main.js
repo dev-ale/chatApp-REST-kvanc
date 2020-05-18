@@ -7,6 +7,7 @@ import store from './store'
 Vue.config.productionTip = false
 Vue.component('vue-title', titleComponent)
 
+
 new Vue({
   vuetify,
   store,

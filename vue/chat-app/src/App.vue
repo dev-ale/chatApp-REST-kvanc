@@ -138,12 +138,36 @@
                       </v-chip>
                     </div>
 
-
-
                   </v-list-item>
                 </v-list>
                 <br>
-                <v-text-field color="primary" v-if="loggedIn" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                <div v-if="loggedIn && gifSelected" class="gif-container">
+                  <img height="50" v-for="gif in gifs" :src="gif" :key="gif.id" @click="console.log('gif clicked')">
+                </div>
+                <v-text-field color="primary" v-if="loggedIn && !gifSelected" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                  <template slot="prepend">
+                    <v-btn icon @click="gifSelected = false">
+                      <v-icon color="dynamic" left>mdi-chat-processing-outline</v-icon>
+                    </v-btn>
+                    <v-btn icon @click="gifSelected = true">
+                      <v-icon left>mdi-gif</v-icon>
+                    </v-btn>
+                  </template>
+                  <template slot="append">
+                    <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
+                      <v-icon left>mdi-send-outline</v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
+                <v-text-field color="primary" v-if="loggedIn && gifSelected" label="GIF suchen" dense outlined v-model="searchTerm" @keyup.enter="getGifs">
+                  <template slot="prepend">
+                    <v-btn icon @click="gifSelected = false">
+                      <v-icon color="dynamic" left>mdi-chat-processing-outline</v-icon>
+                    </v-btn>
+                    <v-btn icon @click="gifSelected = true">
+                      <v-icon left>mdi-gif</v-icon>
+                    </v-btn>
+                  </template>
                   <template slot="append">
                     <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
                       <v-icon left>mdi-send-outline</v-icon>
@@ -266,6 +290,7 @@
                     </v-btn>
                   </template>
                 </v-text-field>
+
               </v-card-text>
             </v-card>
           </v-col>
@@ -285,6 +310,7 @@
 
 <script>
   import axios from "axios"
+
 
   // on fhnw server
   //const Url = 'http://10.35.148.180:8080'
@@ -320,7 +346,10 @@
         refreshInterval: 5,
         password: null,
         showAllMessages: false,
-        alert: false
+        alert: false,
+        searchTerm: "",
+        gifs: [],
+        gifSelected: false
       }
     },
     async created() {
@@ -368,6 +397,28 @@
       }
     },
     methods: {
+      getGifs() {
+        let apiKey = "DA0U9E2wmRjm6XzJs5dDryacvuXxkRSg";
+        let searchEndPoint = "https://api.giphy.com/v1/gifs/search?";
+        let limit = 15;
+        let url = `${searchEndPoint}&api_key=${apiKey}&q=${
+                this.searchTerm
+        }&limit=${limit}`;
+        fetch(url)
+                .then(response => {
+                  return response.json();
+                })
+                .then(json => {
+                  this.buildGifs(json);
+                })
+                .catch(err => console.log(err));
+      },
+      buildGifs(json) {
+        this.gifs = json.data.map(gif => gif.id).map(gifId => {
+          return `https://media.giphy.com/media/${gifId}/giphy.gif`;
+        });
+      },
+
       openSwaggerSite () {
         window.open(this.Url)
       },
