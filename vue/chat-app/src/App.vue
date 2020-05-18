@@ -53,6 +53,15 @@
                       </v-btn>
                     </template>
                   </v-text-field>
+                  <v-alert
+                          :value="alert"
+                          color="error"
+                          dismissible
+                          text
+                          dark
+                          icon="mdi-login-variant"
+                          transition="scale-transition"
+                  >Passwort falsch!</v-alert>
                   <v-list>
                     <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
@@ -305,7 +314,8 @@
         receiver: 'all',
         refreshInterval: 5,
         password: null,
-        showAllMessages: false
+        showAllMessages: false,
+        alert: false
       }
     },
     async created() {
@@ -397,6 +407,10 @@
             this.signIn()
           }else {
             console.log('wrong password')
+            this.alert = true
+            setTimeout(() => {
+              this.alert = false
+            }, 1000);
           }
         }else {
           this.signIn()
