@@ -303,9 +303,9 @@
     },
     data() {
       return {
-        Url: 'http://10.35.148.180:8080',
-        userUrl: 'http://10.35.148.180:8080/api/users',
-        messageUrl: 'http://10.35.148.180:8080/api/messages',
+        Url: 'http://127.0.0.1:5000',
+        userUrl: 'http://127.0.0.1:5000/api/users',
+        messageUrl: 'http://127.0.0.1:5000/api/messages',
         users: [], // Array of Strings with Usernames
         messages: [], // Array of Objects with actual Messages (username, message, time and receiver)
         userName: '',
@@ -324,6 +324,11 @@
       }
     },
     async created() {
+      if (JSON.parse(localStorage.getItem('chat-app'))) {
+        this.userName = JSON.parse(localStorage.getItem('chat-app')).userName
+        console.log(this.userName)
+        this.loggedIn = JSON.parse(localStorage.getItem('chat-app')).loggedIn
+      }
       this.getUsers();
       this.getMessages();
       this.updateData(this.refreshInterval * 1000);
@@ -429,6 +434,8 @@
         try {
           const res = await axios.put(this.userUrl, {username: this.userName});
           this.users = [...this.users, res.data];
+          this.$store.commit('setLoggedInStatus', true )
+          this.$store.commit('setUserName', this.userName )
           this.loggedIn = true;
           this.getUsers();
           this.sendChatboxMessage(' hat sich angemeldet');
@@ -446,6 +453,8 @@
           this.bybySnack = true;
           this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
+          this.$store.commit('setLoggedInStatus', false )
+          this.$store.commit('setUserName', '' )
           this.loggedIn = false;
           this.userName = '';
         } catch(e) {
