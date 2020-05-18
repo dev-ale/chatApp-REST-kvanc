@@ -6,8 +6,8 @@
       <v-spacer></v-spacer>
       <v-toolbar-title>ChatApp REST - kvanc 2020</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="snackbar = true">10.35.148.180 : 8080</v-chip>
-      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">10.35.148.180 : 8080</v-chip>
+      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="openSwaggerSite">{{ this.Url }}</v-chip>
+      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error" @click="openSwaggerSite">{{ this.Url }}</v-chip>
 
     </v-app-bar>
 
@@ -291,8 +291,9 @@
   //const messageUrl = Url + '/api/messages'
 
   // local
-  const userUrl = 'http://127.0.0.1:5000/api/users';
-  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+  //const Url = 'http://127.0.0.1:5000'
+  //const userUrl = Url + '/api/users'
+  //const messageUrl = Url + '/api/messages'
 
 
   export default {
@@ -301,6 +302,9 @@
     },
     data() {
       return {
+        Url: 'http://127.0.0.1:5000',
+        userUrl: 'http://127.0.0.1:5000/api/users',
+        messageUrl: 'http://127.0.0.1:5000/api/messages',
         users: [], // Array of Strings with Usernames
         messages: [], // Array of Objects with actual Messages (username, message, time and receiver)
         userName: '',
@@ -358,6 +362,9 @@
       }
     },
     methods: {
+      openSwaggerSite () {
+        window.open(this.Url)
+      },
 
       calcPrivateMessages () {
         let result = this.messages
@@ -378,7 +385,7 @@
       // Fetches the logged in Users from Backend
       async getUsers() {
         try {
-          const users = await axios.get(userUrl);
+          const users = await axios.get(this.userUrl);
           this.users = users.data;
           this.serverConnected = true;
           if (this.userName === 'admin' && this.loggedIn) {
@@ -395,7 +402,7 @@
       // Fetches theMessages from Backend
       async getMessages() {
           try {
-            const mes = await axios.get(messageUrl);
+            const mes = await axios.get(this.messageUrl);
             this.messages = mes.data;
           } catch(e) {
             console.error(e)
@@ -419,7 +426,7 @@
       // addd the User to The Userlist in Backend
       async signIn() {
         try {
-          const res = await axios.put(userUrl, {username: this.userName});
+          const res = await axios.put(this.userUrl, {username: this.userName});
           this.users = [...this.users, res.data];
           this.loggedIn = true;
           this.getUsers();
@@ -434,7 +441,7 @@
       async signOut() {
         try {
           console.log(this.userName);
-          await axios.delete(userUrl, {data: {username: this.userName}});
+          await axios.delete(this.userUrl, {data: {username: this.userName}});
           this.bybySnack = true;
           this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
@@ -452,7 +459,7 @@
       // Adds a Message to the List with the actual Username
       async sendMessage() {
           try {
-            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
+            const res = await axios.post(this.messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
             this.messages = [...this.messages, res.data]
             this.messageContent = ''
             this.getMessages()
@@ -463,7 +470,7 @@
       // Adds a Message to the List with the actual Username
       async sendChatboxMessage(mes) {
         try {
-          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'all'});
+          const res = await axios.post(this.messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'all'});
           this.messages = [...this.messages, res.data];
           this.getMessages();
         } catch(e) {
