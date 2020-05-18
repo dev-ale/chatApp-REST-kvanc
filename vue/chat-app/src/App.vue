@@ -1,6 +1,7 @@
 <template>
   <v-app>
-
+    <vue-title v-if="!userName" title='kvanc Chat App'></vue-title>
+    <vue-title v-if="loggedIn" :title="'kvanc Chat App ' + userName"></vue-title>
     <v-app-bar app dark :color="dynamic">
       <v-toolbar-title v-if="userName === 'admin' && loggedIn">Admin</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -302,9 +303,9 @@
     },
     data() {
       return {
-        Url: 'http://127.0.0.1:5000',
-        userUrl: 'http://127.0.0.1:5000/api/users',
-        messageUrl: 'http://127.0.0.1:5000/api/messages',
+        Url: 'http://10.35.148.180:8080',
+        userUrl: 'http://10.35.148.180:8080/api/users',
+        messageUrl: 'http://10.35.148.180:8080/api/messages',
         users: [], // Array of Strings with Usernames
         messages: [], // Array of Objects with actual Messages (username, message, time and receiver)
         userName: '',
