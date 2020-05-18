@@ -76,14 +76,15 @@
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
 
-            <v-layout v-if="loggedIn" style="text-align: center" justify-center>
+            <v-layout v-if="this.userName === 'admin' && loggedIn" style="text-align: center" justify-center>
               <v-flex xs12 md4 >
                 <v-switch v-model="showAllMessages" inset class="switch-center" label="zeige mir alle Privatnachrichten"></v-switch>
               </v-flex>
             </v-layout>
 
 
-            <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
+<!--             Normaler Chat-->
+            <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'  && !showAllMessages" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
                 <v-toolbar-title>Öffentlicher Chat</v-toolbar-title>
                 <v-spacer/>
@@ -111,7 +112,7 @@
 
                     <!--Private Messages-->
                     <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
-                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }} </span>
                       <v-chip style="margin-left: 5px" dark color="#00695c">
                         {{ message.message }}
                         <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
@@ -142,7 +143,8 @@
               </v-card-text>
             </v-card>
 
-            <v-card v-if="loggedIn && serverConnected && this.receiver !== 'all'" class="elevation-12">
+            <!--             Private Chat-->
+            <v-card v-if="loggedIn && serverConnected && this.receiver !== 'all' && !showAllMessages" class="elevation-12">
               <v-toolbar color="#00695c" dark flat>
                 <v-toolbar-title>Privater Chat mit: {{ this.receiver }}</v-toolbar-title>
                 <v-spacer/>
@@ -181,6 +183,66 @@
                       </v-chip>
                     </div>
 
+
+
+                  </v-list-item>
+                </v-list>
+                <br>
+                <v-text-field color="primary" v-if="loggedIn" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                  <template slot="append">
+                    <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
+                      <v-icon left>mdi-send-outline</v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
+              </v-card-text>
+            </v-card>
+
+
+            <!--             Admin Chat-->
+            <v-card v-if="loggedIn && serverConnected && showAllMessages" class="elevation-12">
+              <v-toolbar :color="dynamic" dark flat>
+                <v-toolbar-title>Admin Chat</v-toolbar-title>
+                <v-spacer/>
+              </v-toolbar>
+              <v-card-text>
+                <p v-if="this.filterAll.length < 1">Keine Nachrichten</p>
+                <v-list>
+                  <v-list-item v-for="message of messages" :key="message.time">
+
+                    <!--Own Messages-->
+                    <div v-if="message.username === userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px" color="primary">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+                    <!--Chatbot Messages-->
+                    <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
+                      <v-chip small style="margin-left: 5px" color="lightgrey">
+                        {{ message.message }}
+                      </v-chip>
+                    </div>
+
+                    <!--Other Messages-->
+                    <div v-else-if="message.receiver === 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px"  color="success">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+                    <!--Other Messages-->
+                    <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }}</span>
+                      <v-chip dark style="margin-left: 5px"  color="#c62828">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
 
 
                   </v-list-item>
