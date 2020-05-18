@@ -107,6 +107,7 @@
                     <!--Own Messages-->
                     <div v-if="message.username === userName">
                       <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-img max-width="150" max-height="150" :src="message.message"></v-img>
                       <v-chip style="margin-left: 5px" color="primary">
                         {{ message.message }}
                         <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
