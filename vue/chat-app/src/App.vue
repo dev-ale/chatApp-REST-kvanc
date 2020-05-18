@@ -2,6 +2,7 @@
   <v-app>
 
     <v-app-bar app dark :color="dynamic">
+      <v-toolbar-title v-if="userName === 'admin' && loggedIn">Admin</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-title>ChatApp REST - kvanc 2020</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -38,7 +39,16 @@
                 <div v-if="serverConnected">
                   <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
                     <template slot="append">
-                      <v-btn icon color="dynamic" style="margin-bottom: 10px;" @click="signIn">
+
+                      <v-btn v-if="userName !== 'admin'" icon color="dynamic" style="margin-bottom: 10px;" @click="signIn">
+                        <v-icon left>mdi-login-variant</v-icon>
+                      </v-btn>
+
+                    </template>
+                  </v-text-field>
+                  <v-text-field v-if="!loggedIn && userName === 'admin'" label="Passwort" v-model="password" outlined dense type="password">
+                    <template slot="append">
+                      <v-btn v-if="password === 'kvanc2020'" icon color="red" style="margin-bottom: 10px;" @click="signIn">
                         <v-icon left>mdi-login-variant</v-icon>
                       </v-btn>
                     </template>
@@ -52,7 +62,7 @@
                       <v-btn @click="receiver = 'all'"  depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="loggedIn === true && userName !== user.username && receiver === user.username">Privater Chat</v-btn>
 
                       <v-btn depressed x-small v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
-                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
+                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName && loggedIn" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
                 </div>
@@ -66,6 +76,9 @@
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
 
+            <v-card v-if="loggedIn && this.userName === 'admin'">
+              <p>admin</p>
+            </v-card>
 
             <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
@@ -198,13 +211,13 @@
   import axios from "axios"
 
   // on fhnw server
-  const Url = 'http://10.35.148.180:8080'
-  const userUrl = Url + '/api/users'
-  const messageUrl = Url + '/api/messages'
+  //const Url = 'http://10.35.148.180:8080'
+  //const userUrl = Url + '/api/users'
+  //const messageUrl = Url + '/api/messages'
 
   // local
-  //const userUrl = 'http://127.0.0.1:5000/api/users';
-  //const messageUrl = 'http://127.0.0.1:5000/api/messages';
+  const userUrl = 'http://127.0.0.1:5000/api/users';
+  const messageUrl = 'http://127.0.0.1:5000/api/messages';
 
 
   export default {
@@ -224,12 +237,14 @@
         welcomeSnack: false,
         bybySnack: false,
         receiver: 'all',
+        refreshInterval: 5,
+        password: null
       }
     },
     async created() {
       this.getUsers();
       this.getMessages();
-      this.updateData(5000);
+      this.updateData(this.refreshInterval * 1000);
     },
     computed: {
       filterAll: function() {
@@ -275,6 +290,7 @@
       updateData(interval) {
         setInterval(() => {
           this.getUsers()
+          console.log('refreshed at ' + this.refreshInterval)
           //console.log('fetched users')
           if (this.loggedIn) {
             this.getMessages()
@@ -288,7 +304,11 @@
           const users = await axios.get(userUrl);
           this.users = users.data;
           this.serverConnected = true;
-          this.dynamic = '#546e7a';
+          if (this.userName === 'admin' && this.loggedIn) {
+            this.dynamic = '#c62828';
+          }else {
+            this.dynamic = '#546e7a';
+          }
         } catch(e) {
           console.error(e)
           this.serverConnected = false;
