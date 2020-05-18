@@ -37,18 +37,18 @@
 
 
                 <div v-if="serverConnected">
-                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName">
+                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="checkAdmin">
                     <template slot="append">
 
-                      <v-btn v-if="userName !== 'admin'" icon color="dynamic" style="margin-bottom: 10px;" @click="signIn">
+                      <v-btn v-if="userName !== 'admin'" icon color="dynamic" style="margin-bottom: 10px;" @click="checkAdmin">
                         <v-icon left>mdi-login-variant</v-icon>
                       </v-btn>
 
                     </template>
                   </v-text-field>
-                  <v-text-field v-if="!loggedIn && userName === 'admin'" label="Passwort" v-model="password" outlined dense type="password">
+                  <v-text-field v-if="!loggedIn && userName === 'admin'" label="Passwort" v-model="password" outlined dense type="password" @keyup.enter="checkAdmin">
                     <template slot="append">
-                      <v-btn v-if="password === 'kvanc2020'" icon color="red" style="margin-bottom: 10px;" @click="signIn">
+                      <v-btn icon color="red" style="margin-bottom: 10px;" @click="checkAdmin">
                         <v-icon left>mdi-login-variant</v-icon>
                       </v-btn>
                     </template>
@@ -113,7 +113,7 @@
                     <!--Private Messages-->
                     <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
                       <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }} </span>
-                      <v-chip style="margin-left: 5px" dark color="#00695c">
+                      <v-chip @click="receiver = message.username" style="margin-left: 5px" dark color="#00695c">
                         {{ message.message }}
                         <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
                       </v-chip>
@@ -148,6 +148,7 @@
               <v-toolbar color="#00695c" dark flat>
                 <v-toolbar-title>Privater Chat mit: {{ this.receiver }}</v-toolbar-title>
                 <v-spacer/>
+                <v-btn color="#00695c" @click="receiver = 'all'">X</v-btn>
                   <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
                   <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
               </v-toolbar>
@@ -276,13 +277,13 @@
   import axios from "axios"
 
   // on fhnw server
-  const Url = 'http://10.35.148.180:8080'
-  const userUrl = Url + '/api/users'
-  const messageUrl = Url + '/api/messages'
+  //const Url = 'http://10.35.148.180:8080'
+  //const userUrl = Url + '/api/users'
+  //const messageUrl = Url + '/api/messages'
 
   // local
-  //const userUrl = 'http://127.0.0.1:5000/api/users';
-  //const messageUrl = 'http://127.0.0.1:5000/api/messages';
+  const userUrl = 'http://127.0.0.1:5000/api/users';
+  const messageUrl = 'http://127.0.0.1:5000/api/messages';
 
 
   export default {
@@ -390,6 +391,17 @@
             console.error(e)
           }
       },
+      checkAdmin () {
+        if (this.userName === 'admin') {
+          if (this.password === 'kvanc2020') {
+            this.signIn()
+          }else {
+            console.log('wrong password')
+          }
+        }else {
+          this.signIn()
+        }
+      },
       // addd the User to The Userlist in Backend
       async signIn() {
         try {
@@ -399,9 +411,6 @@
           this.getUsers();
           this.sendChatboxMessage(' hat sich angemeldet');
           this.welcomeSnack = true;
-          if (this.userName === 'alejandro.garcia') {
-            this.admin = true
-          }
         } catch(e) {
           console.error(e)
         }
