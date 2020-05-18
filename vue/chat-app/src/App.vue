@@ -1,12 +1,14 @@
 <template>
   <v-app>
-
+    <vue-title v-if="!userName" title='kvanc Chat App'></vue-title>
+    <vue-title v-if="loggedIn" :title="'kvanc Chat App ' + userName"></vue-title>
     <v-app-bar app dark :color="dynamic">
+      <v-toolbar-title v-if="userName === 'admin' && loggedIn">Admin</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-title>ChatApp REST - kvanc 2020</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="snackbar = true">connected</v-chip>
-      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">offline</v-chip>
+      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="openSwaggerSite">{{ this.Url }}</v-chip>
+      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error" @click="openSwaggerSite">{{ this.Url }}</v-chip>
 
     </v-app-bar>
 
@@ -15,7 +17,7 @@
     <v-content>
       <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
-          <v-col cols="12" sm="8" md="3">
+          <v-col cols="12" sm="8" md="4">
             <v-card class="elevation-12">
               <v-toolbar
                       :color="dynamic"
@@ -36,13 +38,31 @@
 
 
                 <div v-if="serverConnected">
-                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
+                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="checkAdmin">
                     <template slot="append">
-                      <v-btn icon color="dynamic" style="margin-bottom: 10px;" @click="signIn">
+
+                      <v-btn v-if="userName !== 'admin'" icon color="dynamic" style="margin-bottom: 10px;" @click="checkAdmin">
+                        <v-icon left>mdi-login-variant</v-icon>
+                      </v-btn>
+
+                    </template>
+                  </v-text-field>
+                  <v-text-field v-if="!loggedIn && userName === 'admin'" label="Passwort" v-model="password" outlined dense type="password" @keyup.enter="checkAdmin">
+                    <template slot="append">
+                      <v-btn icon color="red" style="margin-bottom: 10px;" @click="checkAdmin">
                         <v-icon left>mdi-login-variant</v-icon>
                       </v-btn>
                     </template>
                   </v-text-field>
+                  <v-alert
+                          :value="alert"
+                          color="error"
+                          dismissible
+                          text
+                          dark
+                          icon="mdi-login-variant"
+                          transition="scale-transition"
+                  >Passwort falsch!</v-alert>
                   <v-list>
                     <v-list-item v-for="user of users" :key="user.username">
                       <v-icon>mdi-account</v-icon>
@@ -52,7 +72,7 @@
                       <v-btn @click="receiver = 'all'"  depressed x-small dark color="#00695c" style="margin-left: 5px" v-if="loggedIn === true && userName !== user.username && receiver === user.username">Privater Chat</v-btn>
 
                       <v-btn depressed x-small v-if="receiver === user.username && userName !== user.username" @click="receiver = 'all'">X</v-btn>
-                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName" @click="signOut">Logout</v-btn>
+                      <v-btn depressed x-small color="error" style="margin-left: 5px" v-if="user.username === userName && loggedIn" @click="signOut">Logout</v-btn>
                     </v-list-item>
                   </v-list>
                 </div>
@@ -66,13 +86,18 @@
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
 
+            <v-layout v-if="this.userName === 'admin' && loggedIn" style="text-align: center" justify-center>
+              <v-flex xs12 md4 >
+                <v-switch v-model="showAllMessages" inset class="switch-center" label="zeige mir alle Privatnachrichten"></v-switch>
+              </v-flex>
+            </v-layout>
 
-            <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
+
+<!--             Normaler Chat-->
+            <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'  && !showAllMessages" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
-                <v-toolbar-title>öffentlicher Chat</v-toolbar-title>
+                <v-toolbar-title>Öffentlicher Chat</v-toolbar-title>
                 <v-spacer/>
-                <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
-                <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
               </v-toolbar>
               <v-card-text>
                 <p v-if="this.filterAll.length < 1">Keine Nachrichten</p>
@@ -97,8 +122,8 @@
 
                     <!--Private Messages-->
                     <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
-                      <span style="font-weight: bold">{{ message.username }} : </span>
-                      <v-chip style="margin-left: 5px" dark color="#00695c">
+                      <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }} </span>
+                      <v-chip @click="receiver = message.username" style="margin-left: 5px" dark color="#00695c">
                         {{ message.message }}
                         <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
                       </v-chip>
@@ -128,10 +153,12 @@
               </v-card-text>
             </v-card>
 
-            <v-card v-if="loggedIn && serverConnected && this.receiver !== 'all'" class="elevation-12">
+            <!--             Private Chat-->
+            <v-card v-if="loggedIn && serverConnected && this.receiver !== 'all' && !showAllMessages" class="elevation-12">
               <v-toolbar color="#00695c" dark flat>
                 <v-toolbar-title>Privater Chat mit: {{ this.receiver }}</v-toolbar-title>
                 <v-spacer/>
+                <v-btn color="#00695c" @click="receiver = 'all'">X</v-btn>
                   <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
                   <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
               </v-toolbar>
@@ -181,6 +208,66 @@
                 </v-text-field>
               </v-card-text>
             </v-card>
+
+
+            <!--             Admin Chat-->
+            <v-card v-if="loggedIn && serverConnected && showAllMessages" class="elevation-12">
+              <v-toolbar :color="dynamic" dark flat>
+                <v-toolbar-title>Admin Chat</v-toolbar-title>
+                <v-spacer/>
+              </v-toolbar>
+              <v-card-text>
+                <p v-if="this.filterAll.length < 1">Keine Nachrichten</p>
+                <v-list>
+                  <v-list-item v-for="message of messages" :key="message.time">
+
+                    <!--Own Messages-->
+                    <div v-if="message.username === userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px" color="primary">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+                    <!--Chatbot Messages-->
+                    <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
+                      <v-chip small style="margin-left: 5px" color="lightgrey">
+                        {{ message.message }}
+                      </v-chip>
+                    </div>
+
+                    <!--Other Messages-->
+                    <div v-else-if="message.receiver === 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} : </span>
+                      <v-chip style="margin-left: 5px"  color="success">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+                    <!--Other Messages-->
+                    <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                      <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }}</span>
+                      <v-chip dark style="margin-left: 5px"  color="#c62828">
+                        {{ message.message }}
+                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                      </v-chip>
+                    </div>
+
+
+                  </v-list-item>
+                </v-list>
+                <br>
+                <v-text-field color="primary" v-if="loggedIn" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
+                  <template slot="append">
+                    <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
+                      <v-icon left>mdi-send-outline</v-icon>
+                    </v-btn>
+                  </template>
+                </v-text-field>
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
       </v-container>
@@ -199,13 +286,15 @@
 <script>
   import axios from "axios"
 
-    // on fhnw server
-   //const userUrl = 'http://10.35.148.180:8080/api/users';
-   //const messageUrl = 'http://10.35.148.180:8080/api/messages';
+  // on fhnw server
+  //const Url = 'http://10.35.148.180:8080'
+  //const userUrl = Url + '/api/users'
+  //const messageUrl = Url + '/api/messages'
 
   // local
-  const userUrl = 'http://127.0.0.1:5000/api/users';
-  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+  //const Url = 'http://127.0.0.1:5000'
+  //const userUrl = Url + '/api/users'
+  //const messageUrl = Url + '/api/messages'
 
 
   export default {
@@ -214,6 +303,9 @@
     },
     data() {
       return {
+        Url: 'http://10.35.148.180:8080',
+        userUrl: 'http://10.35.148.180:8080/api/users',
+        messageUrl: 'http://10.35.148.180:8080/api/messages',
         users: [], // Array of Strings with Usernames
         messages: [], // Array of Objects with actual Messages (username, message, time and receiver)
         userName: '',
@@ -224,13 +316,17 @@
         dynamic: 'grey',
         welcomeSnack: false,
         bybySnack: false,
-        receiver: 'all'
+        receiver: 'all',
+        refreshInterval: 5,
+        password: null,
+        showAllMessages: false,
+        alert: false
       }
     },
     async created() {
       this.getUsers();
       this.getMessages();
-      this.updateData(5000);
+      this.updateData(this.refreshInterval * 1000);
     },
     computed: {
       filterAll: function() {
@@ -241,6 +337,7 @@
                   m =>
                           m.receiver === 'all' ||
                           m.receiver === this.userName
+
           );
           console.log(filtered)
         }
@@ -266,6 +363,9 @@
       }
     },
     methods: {
+      openSwaggerSite () {
+        window.open(this.Url)
+      },
 
       calcPrivateMessages () {
         let result = this.messages
@@ -275,6 +375,7 @@
       updateData(interval) {
         setInterval(() => {
           this.getUsers()
+          console.log('refreshed at ' + this.refreshInterval)
           //console.log('fetched users')
           if (this.loggedIn) {
             this.getMessages()
@@ -285,10 +386,14 @@
       // Fetches the logged in Users from Backend
       async getUsers() {
         try {
-          const users = await axios.get(userUrl);
+          const users = await axios.get(this.userUrl);
           this.users = users.data;
           this.serverConnected = true;
-          this.dynamic = '#546e7a';
+          if (this.userName === 'admin' && this.loggedIn) {
+            this.dynamic = '#c62828';
+          }else {
+            this.dynamic = '#546e7a';
+          }
         } catch(e) {
           console.error(e)
           this.serverConnected = false;
@@ -298,16 +403,31 @@
       // Fetches theMessages from Backend
       async getMessages() {
           try {
-            const mes = await axios.get(messageUrl);
+            const mes = await axios.get(this.messageUrl);
             this.messages = mes.data;
           } catch(e) {
             console.error(e)
           }
       },
+      checkAdmin () {
+        if (this.userName === 'admin') {
+          if (this.password === 'kvanc2020') {
+            this.signIn()
+          }else {
+            console.log('wrong password')
+            this.alert = true
+            setTimeout(() => {
+              this.alert = false
+            }, 1000);
+          }
+        }else {
+          this.signIn()
+        }
+      },
       // addd the User to The Userlist in Backend
       async signIn() {
         try {
-          const res = await axios.put(userUrl, {username: this.userName});
+          const res = await axios.put(this.userUrl, {username: this.userName});
           this.users = [...this.users, res.data];
           this.loggedIn = true;
           this.getUsers();
@@ -322,7 +442,7 @@
       async signOut() {
         try {
           console.log(this.userName);
-          await axios.delete(userUrl, {data: {username: this.userName}});
+          await axios.delete(this.userUrl, {data: {username: this.userName}});
           this.bybySnack = true;
           this.sendChatboxMessage(' hat sich abgemeldet');
           this.getUsers();
@@ -339,9 +459,8 @@
       },
       // Adds a Message to the List with the actual Username
       async sendMessage() {
-          console.log("private Message")
           try {
-            const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
+            const res = await axios.post(this.messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
             this.messages = [...this.messages, res.data]
             this.messageContent = ''
             this.getMessages()
@@ -352,7 +471,7 @@
       // Adds a Message to the List with the actual Username
       async sendChatboxMessage(mes) {
         try {
-          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'chatbot'});
+          const res = await axios.post(this.messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'all'});
           this.messages = [...this.messages, res.data];
           this.getMessages();
         } catch(e) {
@@ -368,3 +487,10 @@
 
   }
 </script>
+
+<style>
+  .switch-center {
+    display: flex;
+    justify-content: center;
+  }
+</style>

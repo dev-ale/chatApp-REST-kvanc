@@ -1,15 +1,13 @@
-from flask import Flask
-from flask_cors import CORS
+from flask import Flask, render_template
+from threading import Thread
 import werkzeug
 werkzeug.cached_property = werkzeug.utils.cached_property
 from flask_restplus import Api, Resource, fields
-import json
+import os
 
-
-# init
-app1 = Flask('app1')
-api = Api(app1)
-cors = CORS(app1)
+# Init
+apiServer = Flask('apiServer', static_url_path="/static", static_folder='static')
+api = Api(apiServer)
 
 # create 2 models one for users and one for messages
 model_user = api.model('User', {'username' : fields.String('Name of the User')})
@@ -18,7 +16,6 @@ model_message = api.model('Message', {'username' : fields.String('Username of th
 # creating 2 arrays (messages and users)
 messages = []
 users = []
-admins = [{'username': 'ale'}]
 
 # Users API call
 @api.route('/api/users')
@@ -68,7 +65,29 @@ class Message(Resource):
         messages.remove(api.payload)
         return {'result' : 'Message removed from the chatroom'}, 200
 
+@apiServer.route('/ui')
+def static_file():
+    return apiServer.send_static_file('index.html')
 
+def start_apiServer():
+    print("starting apiServer")
+    apiServer.run(port=5001)
+
+
+
+
+
+
+
+
+
+#def index():
+#   return render_template("index.html")
+
+def start_httpServer():
+    print("starting httpServer")
+    httpServer.run(port=5002,)
 
 if __name__ == '__main__':
-    app1.run(debug=True)
+    #Thread(target=start_apiServer).start()
+    start_apiServer()
