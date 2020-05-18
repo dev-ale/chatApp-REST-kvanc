@@ -6,7 +6,7 @@ from flask_restplus import Api, Resource, fields
 import os
 
 # Init
-apiServer = Flask('apiServer')
+apiServer = Flask('apiServer', static_url_path="/static", static_folder='static')
 api = Api(apiServer)
 
 # create 2 models one for users and one for messages
@@ -65,6 +65,10 @@ class Message(Resource):
         messages.remove(api.payload)
         return {'result' : 'Message removed from the chatroom'}, 200
 
+@apiServer.route('/ui')
+def static_file():
+    return apiServer.send_static_file('index.html')
+
 def start_apiServer():
     print("starting apiServer")
     apiServer.run(port=5001)
@@ -74,11 +78,8 @@ def start_apiServer():
 
 
 
-httpServer = Flask('httpServer', static_url_path="", static_folder='')
 
-@httpServer.route('/')
-def static_file():
-    return app.send_static_file('index.html')
+
 
 #def index():
 #   return render_template("index.html")
@@ -88,5 +89,5 @@ def start_httpServer():
     httpServer.run(port=5002,)
 
 if __name__ == '__main__':
-    Thread(target=start_apiServer).start()
-    start_httpServer()
+    #Thread(target=start_apiServer).start()
+    start_apiServer()

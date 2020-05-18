@@ -37,7 +37,7 @@
 
 
                 <div v-if="serverConnected">
-                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName" @keyup.enter="signIn">
+                  <v-text-field v-if="!loggedIn" label="Benutzername" outlined dense v-model="userName">
                     <template slot="append">
 
                       <v-btn v-if="userName !== 'admin'" icon color="dynamic" style="margin-bottom: 10px;" @click="signIn">
@@ -76,9 +76,12 @@
               <p v-if="!loggedIn && serverConnected">Bitte zuerst einloggen</p>
             </div>
 
-            <v-card v-if="loggedIn && this.userName === 'admin'">
-              <p>admin</p>
-            </v-card>
+            <v-layout v-if="loggedIn" style="text-align: center" justify-center>
+              <v-flex xs12 md4 >
+                <v-switch v-model="showAllMessages" inset class="switch-center" label="zeige mir alle Privatnachrichten"></v-switch>
+              </v-flex>
+            </v-layout>
+
 
             <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
@@ -238,7 +241,8 @@
         bybySnack: false,
         receiver: 'all',
         refreshInterval: 5,
-        password: null
+        password: null,
+        showAllMessages: false
       }
     },
     async created() {
@@ -390,3 +394,10 @@
 
   }
 </script>
+
+<style>
+  .switch-center {
+    display: flex;
+    justify-content: center;
+  }
+</style>
