@@ -5,8 +5,8 @@
       <v-spacer></v-spacer>
       <v-toolbar-title>ChatApp REST - kvanc 2020</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="snackbar = true">connected</v-chip>
-      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">offline</v-chip>
+      <v-chip v-if="serverConnected" style="margin-left: 5px" color="success" @click="snackbar = true">10.35.148.180 : 8080</v-chip>
+      <v-chip v-if="!serverConnected" style="margin-left: 5px" color="error">10.35.148.180 : 8080</v-chip>
 
     </v-app-bar>
 
@@ -15,7 +15,7 @@
     <v-content>
       <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
-          <v-col cols="12" sm="8" md="3">
+          <v-col cols="12" sm="8" md="4">
             <v-card class="elevation-12">
               <v-toolbar
                       :color="dynamic"
@@ -69,10 +69,8 @@
 
             <v-card v-if="loggedIn && serverConnected && this.receiver === 'all'" class="elevation-12">
               <v-toolbar :color="dynamic" dark flat>
-                <v-toolbar-title>öffentlicher Chat</v-toolbar-title>
+                <v-toolbar-title>Öffentlicher Chat</v-toolbar-title>
                 <v-spacer/>
-                <!--TODO: Switch to turn of and on Chatbot Messages doesnt work yet-->
-                <!--<v-switch label="Chatbot" @change="changeChatbotStatus"></v-switch>-->
               </v-toolbar>
               <v-card-text>
                 <p v-if="this.filterAll.length < 1">Keine Nachrichten</p>
@@ -199,13 +197,14 @@
 <script>
   import axios from "axios"
 
-    // on fhnw server
-   //const userUrl = 'http://10.35.148.180:8080/api/users';
-   //const messageUrl = 'http://10.35.148.180:8080/api/messages';
+  // on fhnw server
+  const Url = 'http://10.35.148.180:8080'
+  const userUrl = Url + '/api/users'
+  const messageUrl = Url + '/api/messages'
 
   // local
-  const userUrl = 'http://127.0.0.1:5000/api/users';
-  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+  //const userUrl = 'http://127.0.0.1:5000/api/users';
+  //const messageUrl = 'http://127.0.0.1:5000/api/messages';
 
 
   export default {
@@ -224,7 +223,7 @@
         dynamic: 'grey',
         welcomeSnack: false,
         bybySnack: false,
-        receiver: 'all'
+        receiver: 'all',
       }
     },
     async created() {
@@ -241,6 +240,7 @@
                   m =>
                           m.receiver === 'all' ||
                           m.receiver === this.userName
+
           );
           console.log(filtered)
         }
@@ -313,6 +313,9 @@
           this.getUsers();
           this.sendChatboxMessage(' hat sich angemeldet');
           this.welcomeSnack = true;
+          if (this.userName === 'alejandro.garcia') {
+            this.admin = true
+          }
         } catch(e) {
           console.error(e)
         }
@@ -339,7 +342,6 @@
       },
       // Adds a Message to the List with the actual Username
       async sendMessage() {
-          console.log("private Message")
           try {
             const res = await axios.post(messageUrl, {username: this.userName, message: this.messageContent, time: this.getTime(), receiver: this.receiver})
             this.messages = [...this.messages, res.data]
@@ -352,7 +354,7 @@
       // Adds a Message to the List with the actual Username
       async sendChatboxMessage(mes) {
         try {
-          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'chatbot'});
+          const res = await axios.post(messageUrl, {username: 'Chatbot', message: this.userName + mes, time: this.getTime(), receiver: 'all'});
           this.messages = [...this.messages, res.data];
           this.getMessages();
         } catch(e) {
