@@ -276,13 +276,13 @@
   import axios from "axios"
 
   // on fhnw server
-  //const Url = 'http://10.35.148.180:8080'
-  //const userUrl = Url + '/api/users'
-  //const messageUrl = Url + '/api/messages'
+  const Url = 'http://10.35.148.180:8080'
+  const userUrl = Url + '/api/users'
+  const messageUrl = Url + '/api/messages'
 
   // local
-  const userUrl = 'http://127.0.0.1:5000/api/users';
-  const messageUrl = 'http://127.0.0.1:5000/api/messages';
+  //const userUrl = 'http://127.0.0.1:5000/api/users';
+  //const messageUrl = 'http://127.0.0.1:5000/api/messages';
 
 
   export default {
