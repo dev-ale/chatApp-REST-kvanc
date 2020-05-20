@@ -150,7 +150,7 @@
                 </v-list>
                 <br>
                 <div v-if="loggedIn && gifSelected" class="gif-container">
-                  <img height="50" v-for="gif in gifs" :src="gif" :key="gif.id" @click="console.log('gif clicked')">
+                  <img height="50" v-for="gif in gifs" :src="gif" :key="gif.id" @click="clickedOnGif(gif)">
                 </div>
                 <v-text-field color="primary" v-if="loggedIn && !gifSelected" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
                   <template slot="prepend">
@@ -383,7 +383,6 @@
           console.log(filtered)
         }
         return filtered;
-
       },
       filterPrivate: function() {
         let filtered = this.messages
@@ -404,6 +403,12 @@
       }
     },
     methods: {
+      clickedOnGif (url) {
+        console.log(url)
+        this.messageContent = url
+        this.sendMessage()
+        this.gifSelected = false
+      },
       getGifs() {
         let apiKey = "DA0U9E2wmRjm6XzJs5dDryacvuXxkRSg";
         let searchEndPoint = "https://api.giphy.com/v1/gifs/search?";
@@ -423,7 +428,7 @@
       buildGifs(json) {
         this.gifs = json.data.map(gif => gif.id).map(gifId => {
           return `https://media.giphy.com/media/${gifId}/giphy.gif`;
-        });
+        })
       },
 
       openSwaggerSite () {
