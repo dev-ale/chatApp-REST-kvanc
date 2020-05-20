@@ -104,40 +104,47 @@
                 <v-list>
                   <v-list-item v-for="message of filterAll" :key="message.time">
 
-                    <!--Own Messages-->
-                    <div v-if="message.username === userName">
+                    <div v-if="message.message.toLocaleString().startsWith('http')">
                       <span style="font-weight: bold">{{ message.username }} : </span>
                       <v-img max-width="150" max-height="150" :src="message.message"></v-img>
-                      <v-chip style="margin-left: 5px" color="primary">
-                        {{ message.message }}
-                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                      </v-chip>
+                    </div>
+                    <div v-if="!message.message.toLocaleString().startsWith('http')">
+                      <!--Own Messages-->
+                      <div v-if="message.username === userName">
+                        <span style="font-weight: bold">{{ message.username }} : </span>
+
+                        <v-chip style="margin-left: 5px" color="primary">
+                          {{ message.message }}
+                          <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                        </v-chip>
+                      </div>
+
+                      <!--Chatbot Messages-->
+                      <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
+                        <v-chip small style="margin-left: 5px" color="lightgrey">
+                          {{ message.message }}
+                        </v-chip>
+                      </div>
+
+                      <!--Private Messages-->
+                      <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                        <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }} </span>
+                        <v-chip @click="receiver = message.username" style="margin-left: 5px" dark color="#00695c">
+                          {{ message.message }}
+                          <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                        </v-chip>
+                      </div>
+
+                      <!--Other Messages-->
+                      <div v-else-if="message.receiver === 'all' && message.username !== 'Chatbot' && message.username !== userName">
+                        <span style="font-weight: bold">{{ message.username }} : </span>
+                        <v-chip style="margin-left: 5px"  color="success">
+                          {{ message.message }}
+                          <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
+                        </v-chip>
+                      </div>
                     </div>
 
-                    <!--Chatbot Messages-->
-                    <div v-else-if="message.username === 'Chatbot' && chatbotMessages">
-                      <v-chip small style="margin-left: 5px" color="lightgrey">
-                        {{ message.message }}
-                      </v-chip>
-                    </div>
-
-                    <!--Private Messages-->
-                    <div v-else-if="message.receiver !== 'all' && message.username !== 'Chatbot' && message.username !== userName">
-                      <span style="font-weight: bold">{{ message.username }} @ {{ message.receiver }} </span>
-                      <v-chip @click="receiver = message.username" style="margin-left: 5px" dark color="#00695c">
-                        {{ message.message }}
-                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                      </v-chip>
-                    </div>
-
-                    <!--Other Messages-->
-                    <div v-else-if="message.receiver === 'all' && message.username !== 'Chatbot' && message.username !== userName">
-                      <span style="font-weight: bold">{{ message.username }} : </span>
-                      <v-chip style="margin-left: 5px"  color="success">
-                        {{ message.message }}
-                        <span style="font-size: 0.7em; margin-left: 3px"> <br> {{ message.time }}</span>
-                      </v-chip>
-                    </div>
 
                   </v-list-item>
                 </v-list>
@@ -147,13 +154,14 @@
                 </div>
                 <v-text-field color="primary" v-if="loggedIn && !gifSelected" :label="'Nachricht an: ' + this.receiver" dense outlined v-model="messageContent" @keyup.enter="sendMessage">
                   <template slot="prepend">
-                    <v-btn icon @click="gifSelected = false">
+                    <v-btn v-if="gifSelected" icon @click="gifSelected = false">
                       <v-icon color="dynamic" left>mdi-chat-processing-outline</v-icon>
                     </v-btn>
-                    <v-btn icon @click="gifSelected = true">
+                    <v-btn v-if="!gifSelected" icon @click="gifSelected = true">
                       <v-icon left>mdi-gif</v-icon>
                     </v-btn>
                   </template>
+
                   <template slot="append">
                     <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
                       <v-icon left>mdi-send-outline</v-icon>
@@ -162,18 +170,16 @@
                 </v-text-field>
                 <v-text-field color="primary" v-if="loggedIn && gifSelected" label="GIF suchen" dense outlined v-model="searchTerm" @keyup.enter="getGifs">
                   <template slot="prepend">
-                    <v-btn icon @click="gifSelected = false">
+                    <v-btn v-if="gifSelected" icon @click="gifSelected = false">
                       <v-icon color="dynamic" left>mdi-chat-processing-outline</v-icon>
                     </v-btn>
-                    <v-btn icon @click="gifSelected = true">
+                    <v-btn v-if="!gifSelected" icon @click="gifSelected = true">
                       <v-icon left>mdi-gif</v-icon>
                     </v-btn>
                   </template>
-                  <template slot="append">
-                    <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
-                      <v-icon left>mdi-send-outline</v-icon>
-                    </v-btn>
-                  </template>
+                  <v-btn v-if="!this.messageContent.length == 0" icon color="primary" style="margin-bottom: 10px;" @click="sendMessage">
+                    <v-icon left>mdi-send-outline</v-icon>
+                  </v-btn>
                 </v-text-field>
               </v-card-text>
             </v-card>
